@@ -1,0 +1,12 @@
+// running total with a float accumulator
+float total = 0.0;
+int i = 0;
+
+while (i < 10 && total < 100.5) {
+    total = total + i * 1.5;
+    i = i + 1;
+}
+
+if (total >= 50.0 || i == 10) {
+    total = total - 1.0;
+}
