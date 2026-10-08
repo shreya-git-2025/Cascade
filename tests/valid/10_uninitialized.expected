@@ -1,0 +1,7 @@
+  line 4, col 11: warning: 'counter' is read before it is assigned a value (it defaults to 0)
+  line 5, col 7: warning: 'acc' is read before it is assigned a value (it defaults to 0)
+
+=== PROGRAM STATE (after 17 VM steps) ===
+  counter   int    = 1
+  acc       float  = 1.5
+[exit 0]

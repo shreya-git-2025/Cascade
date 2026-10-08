@@ -1,0 +1,6 @@
+
+=== PROGRAM STATE (after 24 VM steps) ===
+  z         int    = 0
+  safe      int    = 2
+  hits      int    = 1
+[exit 0]

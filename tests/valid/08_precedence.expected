@@ -1,0 +1,10 @@
+
+=== PROGRAM STATE (after 80 VM steps) ===
+  a         int    = 7
+  b         int    = 9
+  c         int    = 3
+  d         int    = 6
+  e         int    = 6
+  f         int    = 3
+  g         int    = 2
+[exit 0]

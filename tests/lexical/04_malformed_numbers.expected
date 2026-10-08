@@ -1,0 +1,5 @@
+3 lexical error(s):
+  line 1, col 11: lexical error: malformed numeric literal '12.'
+  line 2, col 9: lexical error: malformed numeric literal '99bottles'
+  line 3, col 11: lexical error: malformed numeric literal '1.2.3'
+[exit 1]

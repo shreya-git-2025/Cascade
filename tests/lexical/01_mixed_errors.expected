@@ -1,0 +1,5 @@
+3 lexical error(s):
+  line 2, col 6: lexical error: unexpected character '@'
+  line 3, col 11: lexical error: malformed numeric literal '3.14.15'
+  line 4, col 9: lexical error: malformed numeric literal '12abc'
+[exit 1]

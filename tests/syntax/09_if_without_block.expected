@@ -1,0 +1,2 @@
+  line 3, col 13: syntax error: unexpected identifier 'x', expected '{'
+[exit 1]

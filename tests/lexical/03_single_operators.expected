@@ -1,0 +1,4 @@
+2 lexical error(s):
+  line 2, col 11: lexical error: unexpected character '&' (did you mean '&&'?)
+  line 3, col 12: lexical error: unexpected character '|' (did you mean '||'?)
+[exit 1]

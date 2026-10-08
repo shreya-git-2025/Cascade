@@ -1,0 +1,5 @@
+// rejected by design: rel_expr compares exactly two arith_exprs
+int a = 1;
+int b = 2;
+int c = 3;
+if (a < b < c) { a = 0; }

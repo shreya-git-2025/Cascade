@@ -1,0 +1,5 @@
+3 lexical error(s):
+  line 1, col 11: lexical error: unexpected character '$'
+  line 2, col 11: lexical error: unexpected character '#'
+  line 3, col 15: lexical error: unexpected character '@'
+[exit 1]

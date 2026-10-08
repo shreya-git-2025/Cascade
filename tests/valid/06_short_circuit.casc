@@ -1,0 +1,14 @@
+// && must not evaluate its right side when the left is false:
+// without short-circuiting, 10 / z would be a division by zero.
+int z = 0;
+int safe = 0;
+if (z != 0 && 10 / z > 1) {
+    safe = 1;
+} else {
+    safe = 2;
+}
+// || must not evaluate its right side when the left is true
+int hits = 0;
+if (z == 0 || 10 / z > 1) {
+    hits = hits + 1;
+}

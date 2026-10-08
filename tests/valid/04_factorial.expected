@@ -1,0 +1,5 @@
+
+=== PROGRAM STATE (after 163 VM steps) ===
+  n         int    = 1
+  fact      int    = 3628800
+[exit 0]

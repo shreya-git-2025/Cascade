@@ -4,15 +4,23 @@ SRC      := $(wildcard src/*.cpp)
 HDR      := $(wildcard include/*.h)
 BIN      := cascade
 
-.PHONY: all clean test
+.PHONY: all clean test docs
 
 all: $(BIN)
 
 $(BIN): $(SRC) $(HDR)
 	$(CXX) $(CXXFLAGS) -o $(BIN) $(SRC)
 
+# Full regression suite: every tests/*/*.casc against its .expected file
 test: $(BIN)
-	@for f in tests/*.casc; do echo "=== $$f ==="; ./$(BIN) --ast $$f; echo; done
+	@tests/run_tests.sh
+
+# Regenerate the intermediate-result artifacts used in the report
+docs: $(BIN)
+	@mkdir -p docs/generated
+	./$(BIN) --tables > docs/generated/slr-tables.txt
+	./$(BIN) --all --parse-trace --trace tests/valid/01_if_else.casc > docs/generated/sample-run-if-else.txt
+	./$(BIN) --ast --tac --bytecode tests/valid/06_short_circuit.casc > docs/generated/sample-run-short-circuit.txt
 
 clean:
 	rm -f $(BIN)

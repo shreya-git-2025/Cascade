@@ -1,0 +1,13 @@
+// count primes <= 50 (expected 15) — nested loops, && in a loop condition
+int count = 0;
+int k = 2;
+while (k <= 50) {
+    int d = 2;
+    int prime = 1;
+    while (d * d <= k && prime == 1) {
+        if (k % d == 0) { prime = 0; }
+        d = d + 1;
+    }
+    if (prime == 1) { count = count + 1; }
+    k = k + 1;
+}

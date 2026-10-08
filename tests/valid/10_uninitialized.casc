@@ -1,0 +1,5 @@
+// a bare declaration is zero-initialized; reading it first gives a warning
+int counter;
+float acc;
+counter = counter + 1;
+acc = acc + 1.5;

@@ -1,0 +1,2 @@
+  line 1, col 5: syntax error: unexpected 'while', expected 'id'
+[exit 1]

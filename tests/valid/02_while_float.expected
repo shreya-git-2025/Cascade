@@ -1,0 +1,5 @@
+
+=== PROGRAM STATE (after 300 VM steps) ===
+  total     float  = 66.5
+  i         int    = 10
+[exit 0]

@@ -115,15 +115,21 @@ factor       -> MINUS factor
 7. unary `-` (right-associative by construction — `factor -> MINUS factor`
    recurses on itself)
 
-### Design notes / open questions for Review 2
+### Design decisions (resolved at Review 2)
 
-- `decl_stmt` allows a bare declaration (`int x;`) with no initializer.
-  Semantic analysis will need a policy for reading an uninitialized
-  variable — flag it as an error, or default to zero. Not decided yet.
-- `,` is tokenized but not yet used anywhere in the grammar. It's reserved
-  in case comma-separated declarations (`int x, y;`) get added later; if
-  that doesn't happen it should be dropped from the token table before
-  Review 3 rather than left as dead weight.
-- Relational operators are intentionally non-chaining (see above) to keep
-  `rel_expr` conflict-free in the SLR table — worth calling out explicitly
-  if asked in review, since it's a deliberate restriction relative to C.
+- **Uninitialized variables** — a bare declaration (`int x;`) is
+  zero-initialized (`0` / `0.0`). The semantic analyzer emits a *warning*
+  (not an error) the first time such a variable is read before any
+  assignment appears in program text. See `tests/valid/10_uninitialized.casc`.
+- **`,`** is still tokenized but unused by the grammar. Comma-separated
+  declarations remain a candidate for the final phase; if they aren't
+  added, `COMMA` is dropped from the token table before Review 3.
+- **Non-chaining relational operators** — `a < b < c` is a syntax error by
+  design (`rel_expr` compares exactly two `arith_expr`s), which keeps the
+  SLR table conflict-free. See `tests/syntax/03_chained_relational.casc`.
+- **No dangling-else ambiguity** — `if`/`while` bodies must be blocks, so
+  `ELSE` is never in FOLLOW(`if_stmt`) and the SLR table has no
+  shift/reduce conflict there. `./cascade --tables` confirms the grammar
+  is SLR(1): 78 LR(0) states, 0 conflicts.
+- **Typing rules** (enforced in Stage 3) are listed in
+  [implementation.md](implementation.md#stage-3--semantic-analysis).

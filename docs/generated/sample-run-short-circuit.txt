@@ -1,0 +1,115 @@
+
+=== ANNOTATED AST ===
+Program   [1:1]
+  Decl int z   [3:1]
+    Int 0  : int   [3:9]
+  Decl int safe   [4:1]
+    Int 0  : int   [4:12]
+  IfElse   [5:1]
+    Binary &&  : bool   [5:12]
+      Binary !=  : bool   [5:7]
+        Var z  : int   [5:5]
+        Int 0  : int   [5:10]
+      Binary >  : bool   [5:22]
+        Binary /  : int   [5:18]
+          Int 10  : int   [5:15]
+          Var z  : int   [5:20]
+        Int 1  : int   [5:24]
+    Block   [5:27]
+      Assign safe   [6:5]
+        Int 1  : int   [6:12]
+    Block   [7:8]
+      Assign safe   [8:5]
+        Int 2  : int   [8:12]
+  Decl int hits   [11:1]
+    Int 0  : int   [11:12]
+  If   [12:1]
+    Binary ||  : bool   [12:12]
+      Binary ==  : bool   [12:7]
+        Var z  : int   [12:5]
+        Int 0  : int   [12:10]
+      Binary >  : bool   [12:22]
+        Binary /  : int   [12:18]
+          Int 10  : int   [12:15]
+          Var z  : int   [12:20]
+        Int 1  : int   [12:24]
+    Block   [12:27]
+      Assign hits   [13:5]
+        Binary +  : int   [13:17]
+          Var hits  : int   [13:12]
+          Int 1  : int   [13:19]
+
+=== THREE-ADDRESS CODE ===
+   0:  z = 0
+   1:  safe = 0
+   2:  if z != 0 goto 4
+   3:  goto 9
+   4:  t1 = 10 / z
+   5:  if t1 > 1 goto 7
+   6:  goto 9
+   7:  safe = 1
+   8:  goto 10
+   9:  safe = 2
+  10:  hits = 0
+  11:  if z == 0 goto 16
+  12:  goto 13
+  13:  t2 = 10 / z
+  14:  if t2 > 1 goto 16
+  15:  goto 18
+  16:  t3 = hits + 1
+  17:  hits = t3
+  18:  halt
+
+=== BYTECODE ===
+slots: [0]z:int [1]safe:int [2]hits:int [3]t1:int [4]t2:int [5]t3:int
+   0:  PUSH_I 0
+   1:  STORE  z
+   2:  PUSH_I 0
+   3:  STORE  safe
+   4:  LOAD   z
+   5:  PUSH_I 0
+   6:  NE_I   
+   7:  JNZ    -> 9
+   8:  JMP    -> 21
+   9:  PUSH_I 10
+  10:  LOAD   z
+  11:  DIV_I  
+  12:  STORE  t1
+  13:  LOAD   t1
+  14:  PUSH_I 1
+  15:  GT_I   
+  16:  JNZ    -> 18
+  17:  JMP    -> 21
+  18:  PUSH_I 1
+  19:  STORE  safe
+  20:  JMP    -> 23
+  21:  PUSH_I 2
+  22:  STORE  safe
+  23:  PUSH_I 0
+  24:  STORE  hits
+  25:  LOAD   z
+  26:  PUSH_I 0
+  27:  EQ_I   
+  28:  JNZ    -> 39
+  29:  JMP    -> 30
+  30:  PUSH_I 10
+  31:  LOAD   z
+  32:  DIV_I  
+  33:  STORE  t2
+  34:  LOAD   t2
+  35:  PUSH_I 1
+  36:  GT_I   
+  37:  JNZ    -> 39
+  38:  JMP    -> 45
+  39:  LOAD   hits
+  40:  PUSH_I 1
+  41:  ADD_I  
+  42:  STORE  t3
+  43:  LOAD   t3
+  44:  STORE  hits
+  45:  HALT   
+
+=== PROGRAM STATE (after 24 VM steps) ===
+  z         int    = 0
+  safe      int    = 2
+  hits      int    = 1

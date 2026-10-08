@@ -1,0 +1,7 @@
+// 10! = 3628800
+int n = 10;
+int fact = 1;
+while (n > 1) {
+    fact = fact * n;
+    n = n - 1;
+}

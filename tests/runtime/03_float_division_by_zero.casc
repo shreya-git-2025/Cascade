@@ -1,0 +1,2 @@
+float x = 1.0;
+float y = x / 0.0;

@@ -1,0 +1,7 @@
+
+=== PROGRAM STATE (after 27 VM steps) ===
+  x         int    = 1
+  seen      int    = 101
+  x.1       int    = 101
+  x.2       float  = 5.0
+[exit 0]

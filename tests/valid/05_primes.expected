@@ -1,0 +1,7 @@
+
+=== PROGRAM STATE (after 4304 VM steps) ===
+  count     int    = 15
+  k         int    = 51
+  d         int    = 3
+  prime     int    = 0
+[exit 0]

@@ -1,0 +1,8 @@
+// int is implicitly widened to float; int / int stays integer division
+int i = 7;
+float half = i / 2;
+float exact = i / 2.0;
+float sum = i + 0.5;
+float scaled = 3;
+int cmp = 0;
+if (i > 6.5) { cmp = 1; }

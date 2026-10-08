@@ -1,0 +1,3 @@
+1 semantic error(s):
+  line 2, col 11: semantic error: '%' needs int operands, got int and float
+[exit 1]

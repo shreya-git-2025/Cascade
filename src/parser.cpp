@@ -91,6 +91,10 @@ NodePtr Parser::parse(std::ostream* trace) {
                         if (i) msg << (i + 1 == expected.size() ? " or " : ", ");
                         msg << "'" << symbolName(expected[i]) << "'";
                     }
+                } else if (table.action(s, term(TokenType::SEMICOLON)).kind != ActKind::Error) {
+                    // too many alternatives to list, but a ';' would have
+                    // been accepted here — by far the most common mistake
+                    msg << " (missing ';' before it?)";
                 }
                 errors_.push_back(ParseError{msg.str(), tok.line, tok.column});
                 // Stop at the first syntax error. Panic-mode recovery

@@ -1,0 +1,12 @@
+// inner blocks may shadow outer names; the outer x is untouched
+int x = 1;
+int seen = 0;
+{
+    int x = 100;
+    x = x + 1;
+    seen = x;
+}
+if (x == 1) {
+    float x = 2.5;
+    x = x * 2.0;
+}

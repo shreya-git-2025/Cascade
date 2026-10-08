@@ -1,0 +1,7 @@
+// every error is reported, not just the first
+int a = 1;
+int a = 2;
+b = 3;
+int c = 2.5;
+if (a + 1) { a = 0; }
+float d = !a;

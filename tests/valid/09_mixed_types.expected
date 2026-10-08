@@ -1,0 +1,9 @@
+
+=== PROGRAM STATE (after 43 VM steps) ===
+  i         int    = 7
+  half      float  = 3.0
+  exact     float  = 3.5
+  sum       float  = 7.5
+  scaled    float  = 3.0
+  cmp       int    = 1
+[exit 0]

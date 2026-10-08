@@ -1,0 +1,8 @@
+// Euclid's algorithm: gcd(1071, 462) = 21
+int a = 1071;
+int b = 462;
+while (b != 0) {
+    int t = b;
+    b = a % b;
+    a = t;
+}
