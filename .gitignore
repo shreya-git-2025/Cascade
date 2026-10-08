@@ -1,1 +1,4 @@
 cascade_lexer
+cascade
+*.o
+.DS_Store
