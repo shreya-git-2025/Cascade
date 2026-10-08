@@ -6,6 +6,7 @@
 #include <string>
 #include "../include/lexer.h"
 #include "../include/parser.h"
+#include "../include/semantic.h"
 #include "../include/slr.h"
 
 namespace {
@@ -15,6 +16,7 @@ struct Options {
     bool tables = false;
     bool parseTrace = false;
     bool ast = false;
+    bool symbols = false;
     std::string stopAfter; // "", "lex", "parse"
     std::string file;
 };
@@ -27,8 +29,9 @@ void usage() {
         "  --tokens         print the token stream                (stage 1)\n"
         "  --tables         print FIRST/FOLLOW, LR(0) item sets, SLR table\n"
         "  --parse-trace    print every shift/reduce step         (stage 2)\n"
-        "  --ast            print the abstract syntax tree        (stage 2)\n"
-        "  --stop-after=S   stop after stage S: lex | parse\n";
+        "  --ast            print the AST (annotated after stage 3)\n"
+        "  --symbols        print the symbol table                (stage 3)\n"
+        "  --stop-after=S   stop after stage S: lex | parse | sema\n";
 }
 
 bool parseArgs(int argc, char** argv, Options& o) {
@@ -38,6 +41,7 @@ bool parseArgs(int argc, char** argv, Options& o) {
         else if (a == "--tables") o.tables = true;
         else if (a == "--parse-trace") o.parseTrace = true;
         else if (a == "--ast") o.ast = true;
+        else if (a == "--symbols") o.symbols = true;
         else if (a.rfind("--stop-after=", 0) == 0) o.stopAfter = a.substr(13);
         else if (!a.empty() && a[0] == '-') { std::cerr << "unknown option '" << a << "'\n"; return false; }
         else if (o.file.empty()) o.file = a;
@@ -119,7 +123,27 @@ int main(int argc, char** argv) {
         }
         return 1;
     }
-    if (opt.ast) { header("AST"); printAst(program, std::cout); }
-    std::cout << "parse OK\n";
+    if (opt.stopAfter == "parse") {
+        if (opt.ast) { header("AST"); printAst(program, std::cout); }
+        return 0;
+    }
+
+    // ---- Stage 3: semantic analysis ----
+    SemanticAnalyzer sema;
+    sema.analyze(program);
+    for (const SemanticDiag& w : sema.warnings()) {
+        std::cout << "  line " << w.line << ", col " << w.column << ": warning: " << w.message << "\n";
+    }
+    if (opt.ast) { header("ANNOTATED AST"); printAst(program, std::cout); }
+    if (opt.symbols) { header("SYMBOL TABLE"); sema.printSymbolTable(std::cout); }
+    if (sema.hasErrors()) {
+        std::cout << sema.errors().size() << " semantic error(s):\n";
+        for (const SemanticDiag& err : sema.errors()) {
+            std::cout << "  line " << err.line << ", col " << err.column
+                      << ": semantic error: " << err.message << "\n";
+        }
+        return 1;
+    }
+    if (opt.stopAfter == "sema") return 0;
     return 0;
 }
