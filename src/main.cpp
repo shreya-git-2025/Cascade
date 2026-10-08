@@ -8,6 +8,7 @@
 #include "../include/parser.h"
 #include "../include/semantic.h"
 #include "../include/slr.h"
+#include "../include/tac.h"
 
 namespace {
 
@@ -17,7 +18,8 @@ struct Options {
     bool parseTrace = false;
     bool ast = false;
     bool symbols = false;
-    std::string stopAfter; // "", "lex", "parse"
+    bool tac = false;
+    std::string stopAfter; // "", "lex", "parse", "sema", "tac"
     std::string file;
 };
 
@@ -31,7 +33,8 @@ void usage() {
         "  --parse-trace    print every shift/reduce step         (stage 2)\n"
         "  --ast            print the AST (annotated after stage 3)\n"
         "  --symbols        print the symbol table                (stage 3)\n"
-        "  --stop-after=S   stop after stage S: lex | parse | sema\n";
+        "  --tac            print three-address code              (stage 4)\n"
+        "  --stop-after=S   stop after stage S: lex | parse | sema | tac\n";
 }
 
 bool parseArgs(int argc, char** argv, Options& o) {
@@ -42,6 +45,7 @@ bool parseArgs(int argc, char** argv, Options& o) {
         else if (a == "--parse-trace") o.parseTrace = true;
         else if (a == "--ast") o.ast = true;
         else if (a == "--symbols") o.symbols = true;
+        else if (a == "--tac") o.tac = true;
         else if (a.rfind("--stop-after=", 0) == 0) o.stopAfter = a.substr(13);
         else if (!a.empty() && a[0] == '-') { std::cerr << "unknown option '" << a << "'\n"; return false; }
         else if (o.file.empty()) o.file = a;
@@ -145,5 +149,11 @@ int main(int argc, char** argv) {
         return 1;
     }
     if (opt.stopAfter == "sema") return 0;
+
+    // ---- Stage 4: intermediate code generation ----
+    TacGenerator icg;
+    TacProgram tac = icg.generate(program, sema.symbols());
+    if (opt.tac) { header("THREE-ADDRESS CODE"); tac.print(std::cout); }
+    if (opt.stopAfter == "tac") return 0;
     return 0;
 }
