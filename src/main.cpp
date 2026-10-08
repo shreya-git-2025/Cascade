@@ -1,4 +1,4 @@
-#include <cstring>
+#include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -9,6 +9,7 @@
 #include "../include/semantic.h"
 #include "../include/slr.h"
 #include "../include/tac.h"
+#include "../include/vm.h"
 
 namespace {
 
@@ -19,6 +20,9 @@ struct Options {
     bool ast = false;
     bool symbols = false;
     bool tac = false;
+    bool bytecode = false;
+    bool trace = false;
+    long long maxSteps = 10000000;
     std::string stopAfter; // "", "lex", "parse", "sema", "tac"
     std::string file;
 };
@@ -34,7 +38,13 @@ void usage() {
         "  --ast            print the AST (annotated after stage 3)\n"
         "  --symbols        print the symbol table                (stage 3)\n"
         "  --tac            print three-address code              (stage 4)\n"
-        "  --stop-after=S   stop after stage S: lex | parse | sema | tac\n";
+        "  --bytecode       print VM bytecode                     (stage 5)\n"
+        "  --trace          trace VM execution step by step       (stage 5)\n"
+        "  --all            --tokens --ast --symbols --tac --bytecode\n"
+        "  --max-steps=N    VM step limit (default 10000000)\n"
+        "  --stop-after=S   stop after stage S: lex | parse | sema | tac\n"
+        "\n"
+        "exit status: 0 ok, 1 compile error, 2 usage/I-O error, 3 runtime error\n";
 }
 
 bool parseArgs(int argc, char** argv, Options& o) {
@@ -46,6 +56,10 @@ bool parseArgs(int argc, char** argv, Options& o) {
         else if (a == "--ast") o.ast = true;
         else if (a == "--symbols") o.symbols = true;
         else if (a == "--tac") o.tac = true;
+        else if (a == "--bytecode") o.bytecode = true;
+        else if (a == "--trace") o.trace = true;
+        else if (a == "--all") o.tokens = o.ast = o.symbols = o.tac = o.bytecode = true;
+        else if (a.rfind("--max-steps=", 0) == 0) o.maxSteps = std::atoll(a.c_str() + 12);
         else if (a.rfind("--stop-after=", 0) == 0) o.stopAfter = a.substr(13);
         else if (!a.empty() && a[0] == '-') { std::cerr << "unknown option '" << a << "'\n"; return false; }
         else if (o.file.empty()) o.file = a;
@@ -155,5 +169,20 @@ int main(int argc, char** argv) {
     TacProgram tac = icg.generate(program, sema.symbols());
     if (opt.tac) { header("THREE-ADDRESS CODE"); tac.print(std::cout); }
     if (opt.stopAfter == "tac") return 0;
+
+    // ---- Stage 5: assemble to bytecode and run on the stack VM ----
+    Bytecode bc = assemble(tac);
+    if (opt.bytecode) { header("BYTECODE"); bc.print(std::cout); }
+    VirtualMachine vm(bc, opt.maxSteps);
+    if (opt.trace) header("EXECUTION TRACE");
+    bool ran = vm.run(opt.trace ? &std::cout : nullptr);
+    if (!ran) {
+        std::cout << "runtime error";
+        if (vm.error().line > 0) std::cout << " at line " << vm.error().line;
+        std::cout << ": " << vm.error().message << "\n";
+        return 3;
+    }
+    header("PROGRAM STATE (after " + std::to_string(vm.steps()) + " VM steps)");
+    vm.printState(std::cout);
     return 0;
 }
