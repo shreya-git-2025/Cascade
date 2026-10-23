@@ -1,0 +1,7 @@
+
+=== PROGRAM STATE (after 33 VM steps) ===
+  a         int    = 1
+  flag      int    = 1
+  other     int    = 0
+  f         float  = 1.0
+[exit 0]

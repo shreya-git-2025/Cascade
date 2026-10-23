@@ -1,0 +1,3 @@
+3
+runtime error at line 1: array index -1 is out of bounds (array has 4 elements)
+[exit 3]

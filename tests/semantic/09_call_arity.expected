@@ -1,0 +1,4 @@
+2 semantic error(s):
+  line 2, col 9: semantic error: function 'add' expects 2 argument(s), got 1
+  line 3, col 9: semantic error: function 'add' expects 2 argument(s), got 3
+[exit 1]

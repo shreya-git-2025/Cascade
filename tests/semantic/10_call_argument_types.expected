@@ -1,0 +1,6 @@
+4 semantic error(s):
+  line 5, col 15: semantic error: argument 1 of 'twice' expects int, got float
+  line 6, col 6: semantic error: argument 1 of 'fill' must be an array variable
+  line 7, col 6: semantic error: argument 1 of 'fill' must be an array, but 'f' is not one
+  line 9, col 6: semantic error: argument 1 of 'fill' must be an array, but 's' is not one
+[exit 1]

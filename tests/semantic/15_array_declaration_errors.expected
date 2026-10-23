@@ -1,0 +1,6 @@
+4 semantic error(s):
+  line 1, col 1: semantic error: array 'a' must have a size between 1 and 1000000
+  line 2, col 1: semantic error: too many initializers for array 'b' (size 2, 3 given)
+  line 3, col 16: semantic error: type mismatch: cannot assign float to int element of array 'c' (implicit float-to-int narrowing is not allowed)
+  line 5, col 1: semantic error: redeclaration of 'd' (first declared at line 4)
+[exit 1]

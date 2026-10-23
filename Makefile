@@ -21,6 +21,7 @@ docs: $(BIN)
 	./$(BIN) --tables > docs/generated/slr-tables.txt
 	./$(BIN) --all --parse-trace --trace tests/valid/01_if_else.casc > docs/generated/sample-run-if-else.txt
 	./$(BIN) --ast --tac --bytecode tests/valid/06_short_circuit.casc > docs/generated/sample-run-short-circuit.txt
+	./$(BIN) --ast --symbols --tac --bytecode tests/valid/16_array_sort.casc > docs/generated/sample-run-functions-arrays.txt
 
 clean:
 	rm -f $(BIN)

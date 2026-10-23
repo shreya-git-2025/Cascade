@@ -1,0 +1,4 @@
+2 semantic error(s):
+  line 2, col 1: semantic error: cannot use the result of a void function as a value
+  line 3, col 19: semantic error: '+' needs numeric operands, got void and int
+[exit 1]

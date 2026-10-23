@@ -1,0 +1,11 @@
+int add(int a, int b) { return a + b; }
+int twice(int x) { return add(x, x); }
+float scale(float x, int k) { return x * k; }
+int main() {
+    print(add(twice(3), add(1, 2)) * 2);
+    print(scale(1.5, twice(2)));
+    int r = add(add(1, 2), add(3, 4)) + twice(5);
+    print(r);
+    if (add(1, 1) == 2 && twice(2) == 4) { print(1); } else { print(0); }
+    return 0;
+}

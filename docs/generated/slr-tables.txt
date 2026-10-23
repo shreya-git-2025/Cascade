@@ -1,252 +1,652 @@
 GRAMMAR (augmented, numbered)
     0)  S' -> program
-    1)  program -> stmt_list
-    2)  stmt_list -> stmt_list stmt
-    3)  stmt_list -> stmt
-    4)  stmt -> decl_stmt
-    5)  stmt -> assign_stmt
-    6)  stmt -> if_stmt
-    7)  stmt -> while_stmt
-    8)  stmt -> block
-    9)  decl_stmt -> type id = expr ;
-   10)  decl_stmt -> type id ;
-   11)  type -> int
-   12)  type -> float
-   13)  assign_stmt -> id = expr ;
-   14)  if_stmt -> if ( expr ) block
-   15)  if_stmt -> if ( expr ) block else block
-   16)  while_stmt -> while ( expr ) block
-   17)  block -> { stmt_list }
-   18)  block -> { }
-   19)  expr -> expr || and_expr
-   20)  expr -> and_expr
-   21)  and_expr -> and_expr && not_expr
-   22)  and_expr -> not_expr
-   23)  not_expr -> ! not_expr
-   24)  not_expr -> rel_expr
-   25)  rel_expr -> arith_expr relop arith_expr
-   26)  rel_expr -> arith_expr
-   27)  relop -> <
-   28)  relop -> <=
-   29)  relop -> >
-   30)  relop -> >=
-   31)  relop -> ==
-   32)  relop -> !=
-   33)  arith_expr -> arith_expr + term
-   34)  arith_expr -> arith_expr - term
-   35)  arith_expr -> term
-   36)  term -> term * factor
-   37)  term -> term / factor
-   38)  term -> term % factor
-   39)  term -> factor
-   40)  factor -> - factor
-   41)  factor -> ( expr )
-   42)  factor -> id
-   43)  factor -> int_lit
-   44)  factor -> float_lit
-   45)  factor -> true
-   46)  factor -> false
+    1)  program -> item_list
+    2)  item_list -> item_list item
+    3)  item_list -> item
+    4)  item -> stmt
+    5)  item -> func_def
+    6)  item -> func_proto
+    7)  func_def -> type id ( params ) block
+    8)  func_def -> type id ( ) block
+    9)  func_def -> void id ( params ) block
+   10)  func_def -> void id ( ) block
+   11)  func_def -> type id ( void ) block
+   12)  func_def -> void id ( void ) block
+   13)  func_proto -> type id ( void ) ;
+   14)  func_proto -> void id ( void ) ;
+   15)  func_proto -> type id ( params ) ;
+   16)  func_proto -> type id ( ) ;
+   17)  func_proto -> void id ( params ) ;
+   18)  func_proto -> void id ( ) ;
+   19)  params -> params , param
+   20)  params -> param
+   21)  param -> type id
+   22)  param -> type id [ ]
+   23)  stmt_list -> stmt_list stmt
+   24)  stmt_list -> stmt
+   25)  stmt -> decl_stmt
+   26)  stmt -> assign_stmt
+   27)  stmt -> call_stmt
+   28)  stmt -> return_stmt
+   29)  stmt -> print_stmt
+   30)  stmt -> break_stmt
+   31)  stmt -> continue_stmt
+   32)  stmt -> for_stmt
+   33)  stmt -> if_stmt
+   34)  stmt -> while_stmt
+   35)  stmt -> block
+   36)  decl_stmt -> type id = expr ;
+   37)  decl_stmt -> type id ;
+   38)  decl_stmt -> type id [ int_lit ] ;
+   39)  decl_stmt -> type id [ int_lit ] = { expr_list } ;
+   40)  decl_stmt -> type id [ ] = { expr_list } ;
+   41)  type -> int
+   42)  type -> float
+   43)  assign_stmt -> simple ;
+   44)  simple -> lvalue = expr
+   45)  simple -> lvalue += expr
+   46)  simple -> lvalue -= expr
+   47)  simple -> lvalue *= expr
+   48)  simple -> lvalue /= expr
+   49)  simple -> lvalue %= expr
+   50)  simple -> lvalue ++
+   51)  simple -> lvalue --
+   52)  lvalue -> id
+   53)  lvalue -> id [ expr ]
+   54)  call_stmt -> id ( expr_list ) ;
+   55)  call_stmt -> id ( ) ;
+   56)  expr_list -> expr_list , expr
+   57)  expr_list -> expr
+   58)  return_stmt -> return expr ;
+   59)  return_stmt -> return ;
+   60)  print_stmt -> print ( expr ) ;
+   61)  break_stmt -> break ;
+   62)  continue_stmt -> continue ;
+   63)  for_stmt -> for ( for_init ; expr ; simple ) stmt
+   64)  for_init -> simple
+   65)  for_init -> type id = expr
+   66)  if_stmt -> if ( expr ) stmt
+   67)  if_stmt -> if ( expr ) stmt else stmt
+   68)  while_stmt -> while ( expr ) stmt
+   69)  block -> { stmt_list }
+   70)  block -> { }
+   71)  expr -> expr || and_expr
+   72)  expr -> and_expr
+   73)  and_expr -> and_expr && not_expr
+   74)  and_expr -> not_expr
+   75)  not_expr -> ! not_expr
+   76)  not_expr -> rel_expr
+   77)  rel_expr -> arith_expr relop arith_expr
+   78)  rel_expr -> arith_expr
+   79)  relop -> <
+   80)  relop -> <=
+   81)  relop -> >
+   82)  relop -> >=
+   83)  relop -> ==
+   84)  relop -> !=
+   85)  arith_expr -> arith_expr + term
+   86)  arith_expr -> arith_expr - term
+   87)  arith_expr -> term
+   88)  term -> term * factor
+   89)  term -> term / factor
+   90)  term -> term % factor
+   91)  term -> factor
+   92)  factor -> - factor
+   93)  factor -> ( expr )
+   94)  factor -> id
+   95)  factor -> id [ expr ]
+   96)  factor -> id ( expr_list )
+   97)  factor -> id ( )
+   98)  factor -> int_lit
+   99)  factor -> float_lit
+  100)  factor -> true
+  101)  factor -> false
 
 FIRST / FOLLOW SETS
-  S'           FIRST  = { id, int, float, if, while, { }
+  S'           FIRST  = { id, int, float, if, while, void, return, for, print, break, continue, { }
                FOLLOW = { $ }
-  program      FIRST  = { id, int, float, if, while, { }
+  program      FIRST  = { id, int, float, if, while, void, return, for, print, break, continue, { }
                FOLLOW = { $ }
-  stmt_list    FIRST  = { id, int, float, if, while, { }
-               FOLLOW = { id, int, float, if, while, {, }, $ }
-  stmt         FIRST  = { id, int, float, if, while, { }
-               FOLLOW = { id, int, float, if, while, {, }, $ }
+  item_list    FIRST  = { id, int, float, if, while, void, return, for, print, break, continue, { }
+               FOLLOW = { id, int, float, if, while, void, return, for, print, break, continue, {, $ }
+  item         FIRST  = { id, int, float, if, while, void, return, for, print, break, continue, { }
+               FOLLOW = { id, int, float, if, while, void, return, for, print, break, continue, {, $ }
+  func_def     FIRST  = { int, float, void }
+               FOLLOW = { id, int, float, if, while, void, return, for, print, break, continue, {, $ }
+  func_proto   FIRST  = { int, float, void }
+               FOLLOW = { id, int, float, if, while, void, return, for, print, break, continue, {, $ }
+  params       FIRST  = { int, float }
+               FOLLOW = { ), , }
+  param        FIRST  = { int, float }
+               FOLLOW = { ), , }
+  stmt_list    FIRST  = { id, int, float, if, while, return, for, print, break, continue, { }
+               FOLLOW = { id, int, float, if, while, return, for, print, break, continue, {, } }
+  stmt         FIRST  = { id, int, float, if, while, return, for, print, break, continue, { }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
   decl_stmt    FIRST  = { int, float }
-               FOLLOW = { id, int, float, if, while, {, }, $ }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
   type         FIRST  = { int, float }
                FOLLOW = { id }
   assign_stmt  FIRST  = { id }
-               FOLLOW = { id, int, float, if, while, {, }, $ }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  simple       FIRST  = { id }
+               FOLLOW = { ), ; }
+  lvalue       FIRST  = { id }
+               FOLLOW = { =, +=, -=, *=, /=, %=, ++, -- }
+  call_stmt    FIRST  = { id }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  return_stmt  FIRST  = { return }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  print_stmt   FIRST  = { print }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  break_stmt   FIRST  = { break }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  continue_stmt FIRST  = { continue }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  for_stmt     FIRST  = { for }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  for_init     FIRST  = { id, int, float }
+               FOLLOW = { ; }
   if_stmt      FIRST  = { if }
-               FOLLOW = { id, int, float, if, while, {, }, $ }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
   while_stmt   FIRST  = { while }
-               FOLLOW = { id, int, float, if, while, {, }, $ }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
   block        FIRST  = { { }
-               FOLLOW = { id, int, float, if, else, while, {, }, $ }
+               FOLLOW = { id, int, float, if, else, while, void, return, for, print, break, continue, {, }, $ }
+  expr_list    FIRST  = { id, int_lit, float_lit, true, false, -, !, ( }
+               FOLLOW = { ), }, , }
   expr         FIRST  = { id, int_lit, float_lit, true, false, -, !, ( }
-               FOLLOW = { ||, ), ; }
+               FOLLOW = { ||, ), }, ], ;, , }
   and_expr     FIRST  = { id, int_lit, float_lit, true, false, -, !, ( }
-               FOLLOW = { &&, ||, ), ; }
+               FOLLOW = { &&, ||, ), }, ], ;, , }
   not_expr     FIRST  = { id, int_lit, float_lit, true, false, -, !, ( }
-               FOLLOW = { &&, ||, ), ; }
+               FOLLOW = { &&, ||, ), }, ], ;, , }
   rel_expr     FIRST  = { id, int_lit, float_lit, true, false, -, ( }
-               FOLLOW = { &&, ||, ), ; }
+               FOLLOW = { &&, ||, ), }, ], ;, , }
   relop        FIRST  = { <, <=, >, >=, ==, != }
                FOLLOW = { id, int_lit, float_lit, true, false, -, ( }
   arith_expr   FIRST  = { id, int_lit, float_lit, true, false, -, ( }
-               FOLLOW = { +, -, <, <=, >, >=, ==, !=, &&, ||, ), ; }
+               FOLLOW = { +, -, <, <=, >, >=, ==, !=, &&, ||, ), }, ], ;, , }
   term         FIRST  = { id, int_lit, float_lit, true, false, -, ( }
-               FOLLOW = { +, -, *, /, %, <, <=, >, >=, ==, !=, &&, ||, ), ; }
+               FOLLOW = { +, -, *, /, %, <, <=, >, >=, ==, !=, &&, ||, ), }, ], ;, , }
   factor       FIRST  = { id, int_lit, float_lit, true, false, -, ( }
-               FOLLOW = { +, -, *, /, %, <, <=, >, >=, ==, !=, &&, ||, ), ; }
+               FOLLOW = { +, -, *, /, %, <, <=, >, >=, ==, !=, &&, ||, ), }, ], ;, , }
 
-CANONICAL LR(0) COLLECTION (78 states)
+CANONICAL LR(0) COLLECTION (200 states)
 
 I0:
     S' -> . program
-    program -> . stmt_list
-    stmt_list -> . stmt_list stmt
-    stmt_list -> . stmt
+    program -> . item_list
+    item_list -> . item_list item
+    item_list -> . item
+    item -> . stmt
+    item -> . func_def
+    item -> . func_proto
+    func_def -> . type id ( params ) block
+    func_def -> . type id ( ) block
+    func_def -> . void id ( params ) block
+    func_def -> . void id ( ) block
+    func_def -> . type id ( void ) block
+    func_def -> . void id ( void ) block
+    func_proto -> . type id ( void ) ;
+    func_proto -> . void id ( void ) ;
+    func_proto -> . type id ( params ) ;
+    func_proto -> . type id ( ) ;
+    func_proto -> . void id ( params ) ;
+    func_proto -> . void id ( ) ;
     stmt -> . decl_stmt
     stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
     stmt -> . if_stmt
     stmt -> . while_stmt
     stmt -> . block
     decl_stmt -> . type id = expr ;
     decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
     type -> . int
     type -> . float
-    assign_stmt -> . id = expr ;
-    if_stmt -> . if ( expr ) block
-    if_stmt -> . if ( expr ) block else block
-    while_stmt -> . while ( expr ) block
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    while_stmt -> . while ( expr ) stmt
     block -> . { stmt_list }
     block -> . { }
-    goto(I0, id) = I12
-    goto(I0, int) = I10
-    goto(I0, float) = I11
-    goto(I0, if) = I13
-    goto(I0, while) = I14
-    goto(I0, {) = I15
+    goto(I0, id) = I24
+    goto(I0, int) = I20
+    goto(I0, float) = I21
+    goto(I0, if) = I30
+    goto(I0, while) = I31
+    goto(I0, void) = I8
+    goto(I0, return) = I25
+    goto(I0, for) = I29
+    goto(I0, print) = I26
+    goto(I0, break) = I27
+    goto(I0, continue) = I28
+    goto(I0, {) = I32
     goto(I0, program) = I1
-    goto(I0, stmt_list) = I2
-    goto(I0, stmt) = I3
-    goto(I0, decl_stmt) = I4
-    goto(I0, type) = I9
-    goto(I0, assign_stmt) = I5
-    goto(I0, if_stmt) = I6
-    goto(I0, while_stmt) = I7
-    goto(I0, block) = I8
+    goto(I0, item_list) = I2
+    goto(I0, item) = I3
+    goto(I0, func_def) = I5
+    goto(I0, func_proto) = I6
+    goto(I0, stmt) = I4
+    goto(I0, decl_stmt) = I9
+    goto(I0, type) = I7
+    goto(I0, assign_stmt) = I10
+    goto(I0, simple) = I22
+    goto(I0, lvalue) = I23
+    goto(I0, call_stmt) = I11
+    goto(I0, return_stmt) = I12
+    goto(I0, print_stmt) = I13
+    goto(I0, break_stmt) = I14
+    goto(I0, continue_stmt) = I15
+    goto(I0, for_stmt) = I16
+    goto(I0, if_stmt) = I17
+    goto(I0, while_stmt) = I18
+    goto(I0, block) = I19
 
 I1:
     S' -> program .
 
 I2:
-    program -> stmt_list .
-    stmt_list -> stmt_list . stmt
+    program -> item_list .
+    item_list -> item_list . item
+    item -> . stmt
+    item -> . func_def
+    item -> . func_proto
+    func_def -> . type id ( params ) block
+    func_def -> . type id ( ) block
+    func_def -> . void id ( params ) block
+    func_def -> . void id ( ) block
+    func_def -> . type id ( void ) block
+    func_def -> . void id ( void ) block
+    func_proto -> . type id ( void ) ;
+    func_proto -> . void id ( void ) ;
+    func_proto -> . type id ( params ) ;
+    func_proto -> . type id ( ) ;
+    func_proto -> . void id ( params ) ;
+    func_proto -> . void id ( ) ;
     stmt -> . decl_stmt
     stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
     stmt -> . if_stmt
     stmt -> . while_stmt
     stmt -> . block
     decl_stmt -> . type id = expr ;
     decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
     type -> . int
     type -> . float
-    assign_stmt -> . id = expr ;
-    if_stmt -> . if ( expr ) block
-    if_stmt -> . if ( expr ) block else block
-    while_stmt -> . while ( expr ) block
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    while_stmt -> . while ( expr ) stmt
     block -> . { stmt_list }
     block -> . { }
-    goto(I2, id) = I12
-    goto(I2, int) = I10
-    goto(I2, float) = I11
-    goto(I2, if) = I13
-    goto(I2, while) = I14
-    goto(I2, {) = I15
-    goto(I2, stmt) = I16
-    goto(I2, decl_stmt) = I4
-    goto(I2, type) = I9
-    goto(I2, assign_stmt) = I5
-    goto(I2, if_stmt) = I6
-    goto(I2, while_stmt) = I7
-    goto(I2, block) = I8
+    goto(I2, id) = I24
+    goto(I2, int) = I20
+    goto(I2, float) = I21
+    goto(I2, if) = I30
+    goto(I2, while) = I31
+    goto(I2, void) = I8
+    goto(I2, return) = I25
+    goto(I2, for) = I29
+    goto(I2, print) = I26
+    goto(I2, break) = I27
+    goto(I2, continue) = I28
+    goto(I2, {) = I32
+    goto(I2, item) = I33
+    goto(I2, func_def) = I5
+    goto(I2, func_proto) = I6
+    goto(I2, stmt) = I4
+    goto(I2, decl_stmt) = I9
+    goto(I2, type) = I7
+    goto(I2, assign_stmt) = I10
+    goto(I2, simple) = I22
+    goto(I2, lvalue) = I23
+    goto(I2, call_stmt) = I11
+    goto(I2, return_stmt) = I12
+    goto(I2, print_stmt) = I13
+    goto(I2, break_stmt) = I14
+    goto(I2, continue_stmt) = I15
+    goto(I2, for_stmt) = I16
+    goto(I2, if_stmt) = I17
+    goto(I2, while_stmt) = I18
+    goto(I2, block) = I19
 
 I3:
-    stmt_list -> stmt .
+    item_list -> item .
 
 I4:
-    stmt -> decl_stmt .
+    item -> stmt .
 
 I5:
-    stmt -> assign_stmt .
+    item -> func_def .
 
 I6:
-    stmt -> if_stmt .
+    item -> func_proto .
 
 I7:
-    stmt -> while_stmt .
-
-I8:
-    stmt -> block .
-
-I9:
+    func_def -> type . id ( params ) block
+    func_def -> type . id ( ) block
+    func_def -> type . id ( void ) block
+    func_proto -> type . id ( void ) ;
+    func_proto -> type . id ( params ) ;
+    func_proto -> type . id ( ) ;
     decl_stmt -> type . id = expr ;
     decl_stmt -> type . id ;
-    goto(I9, id) = I17
+    decl_stmt -> type . id [ int_lit ] ;
+    decl_stmt -> type . id [ int_lit ] = { expr_list } ;
+    decl_stmt -> type . id [ ] = { expr_list } ;
+    goto(I7, id) = I34
+
+I8:
+    func_def -> void . id ( params ) block
+    func_def -> void . id ( ) block
+    func_def -> void . id ( void ) block
+    func_proto -> void . id ( void ) ;
+    func_proto -> void . id ( params ) ;
+    func_proto -> void . id ( ) ;
+    goto(I8, id) = I35
+
+I9:
+    stmt -> decl_stmt .
 
 I10:
-    type -> int .
+    stmt -> assign_stmt .
 
 I11:
-    type -> float .
+    stmt -> call_stmt .
 
 I12:
-    assign_stmt -> id . = expr ;
-    goto(I12, =) = I18
+    stmt -> return_stmt .
 
 I13:
-    if_stmt -> if . ( expr ) block
-    if_stmt -> if . ( expr ) block else block
-    goto(I13, () = I19
+    stmt -> print_stmt .
 
 I14:
-    while_stmt -> while . ( expr ) block
-    goto(I14, () = I20
+    stmt -> break_stmt .
 
 I15:
+    stmt -> continue_stmt .
+
+I16:
+    stmt -> for_stmt .
+
+I17:
+    stmt -> if_stmt .
+
+I18:
+    stmt -> while_stmt .
+
+I19:
+    stmt -> block .
+
+I20:
+    type -> int .
+
+I21:
+    type -> float .
+
+I22:
+    assign_stmt -> simple . ;
+    goto(I22, ;) = I36
+
+I23:
+    simple -> lvalue . = expr
+    simple -> lvalue . += expr
+    simple -> lvalue . -= expr
+    simple -> lvalue . *= expr
+    simple -> lvalue . /= expr
+    simple -> lvalue . %= expr
+    simple -> lvalue . ++
+    simple -> lvalue . --
+    goto(I23, =) = I37
+    goto(I23, +=) = I38
+    goto(I23, -=) = I39
+    goto(I23, *=) = I40
+    goto(I23, /=) = I41
+    goto(I23, %=) = I42
+    goto(I23, ++) = I43
+    goto(I23, --) = I44
+
+I24:
+    lvalue -> id .
+    lvalue -> id . [ expr ]
+    call_stmt -> id . ( expr_list ) ;
+    call_stmt -> id . ( ) ;
+    goto(I24, () = I46
+    goto(I24, [) = I45
+
+I25:
+    return_stmt -> return . expr ;
+    return_stmt -> return . ;
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I25, id) = I58
+    goto(I25, int_lit) = I59
+    goto(I25, float_lit) = I60
+    goto(I25, true) = I61
+    goto(I25, false) = I62
+    goto(I25, -) = I56
+    goto(I25, !) = I51
+    goto(I25, () = I57
+    goto(I25, ;) = I48
+    goto(I25, expr) = I47
+    goto(I25, and_expr) = I49
+    goto(I25, not_expr) = I50
+    goto(I25, rel_expr) = I52
+    goto(I25, arith_expr) = I53
+    goto(I25, term) = I54
+    goto(I25, factor) = I55
+
+I26:
+    print_stmt -> print . ( expr ) ;
+    goto(I26, () = I63
+
+I27:
+    break_stmt -> break . ;
+    goto(I27, ;) = I64
+
+I28:
+    continue_stmt -> continue . ;
+    goto(I28, ;) = I65
+
+I29:
+    for_stmt -> for . ( for_init ; expr ; simple ) stmt
+    goto(I29, () = I66
+
+I30:
+    if_stmt -> if . ( expr ) stmt
+    if_stmt -> if . ( expr ) stmt else stmt
+    goto(I30, () = I67
+
+I31:
+    while_stmt -> while . ( expr ) stmt
+    goto(I31, () = I68
+
+I32:
     stmt_list -> . stmt_list stmt
     stmt_list -> . stmt
     stmt -> . decl_stmt
     stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
     stmt -> . if_stmt
     stmt -> . while_stmt
     stmt -> . block
     decl_stmt -> . type id = expr ;
     decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
     type -> . int
     type -> . float
-    assign_stmt -> . id = expr ;
-    if_stmt -> . if ( expr ) block
-    if_stmt -> . if ( expr ) block else block
-    while_stmt -> . while ( expr ) block
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    while_stmt -> . while ( expr ) stmt
     block -> . { stmt_list }
     block -> { . stmt_list }
     block -> . { }
     block -> { . }
-    goto(I15, id) = I12
-    goto(I15, int) = I10
-    goto(I15, float) = I11
-    goto(I15, if) = I13
-    goto(I15, while) = I14
-    goto(I15, {) = I15
-    goto(I15, }) = I22
-    goto(I15, stmt_list) = I21
-    goto(I15, stmt) = I3
-    goto(I15, decl_stmt) = I4
-    goto(I15, type) = I9
-    goto(I15, assign_stmt) = I5
-    goto(I15, if_stmt) = I6
-    goto(I15, while_stmt) = I7
-    goto(I15, block) = I8
+    goto(I32, id) = I24
+    goto(I32, int) = I20
+    goto(I32, float) = I21
+    goto(I32, if) = I30
+    goto(I32, while) = I31
+    goto(I32, return) = I25
+    goto(I32, for) = I29
+    goto(I32, print) = I26
+    goto(I32, break) = I27
+    goto(I32, continue) = I28
+    goto(I32, {) = I32
+    goto(I32, }) = I72
+    goto(I32, stmt_list) = I69
+    goto(I32, stmt) = I70
+    goto(I32, decl_stmt) = I9
+    goto(I32, type) = I71
+    goto(I32, assign_stmt) = I10
+    goto(I32, simple) = I22
+    goto(I32, lvalue) = I23
+    goto(I32, call_stmt) = I11
+    goto(I32, return_stmt) = I12
+    goto(I32, print_stmt) = I13
+    goto(I32, break_stmt) = I14
+    goto(I32, continue_stmt) = I15
+    goto(I32, for_stmt) = I16
+    goto(I32, if_stmt) = I17
+    goto(I32, while_stmt) = I18
+    goto(I32, block) = I19
 
-I16:
-    stmt_list -> stmt_list stmt .
+I33:
+    item_list -> item_list item .
 
-I17:
+I34:
+    func_def -> type id . ( params ) block
+    func_def -> type id . ( ) block
+    func_def -> type id . ( void ) block
+    func_proto -> type id . ( void ) ;
+    func_proto -> type id . ( params ) ;
+    func_proto -> type id . ( ) ;
     decl_stmt -> type id . = expr ;
     decl_stmt -> type id . ;
-    goto(I17, =) = I23
-    goto(I17, ;) = I24
+    decl_stmt -> type id . [ int_lit ] ;
+    decl_stmt -> type id . [ int_lit ] = { expr_list } ;
+    decl_stmt -> type id . [ ] = { expr_list } ;
+    goto(I34, =) = I74
+    goto(I34, () = I73
+    goto(I34, [) = I76
+    goto(I34, ;) = I75
 
-I18:
-    assign_stmt -> id = . expr ;
+I35:
+    func_def -> void id . ( params ) block
+    func_def -> void id . ( ) block
+    func_def -> void id . ( void ) block
+    func_proto -> void id . ( void ) ;
+    func_proto -> void id . ( params ) ;
+    func_proto -> void id . ( ) ;
+    goto(I35, () = I77
+
+I36:
+    assign_stmt -> simple ; .
+
+I37:
+    simple -> lvalue = . expr
     expr -> . expr || and_expr
     expr -> . and_expr
     and_expr -> . and_expr && not_expr
@@ -265,29 +665,31 @@ I18:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I18, id) = I35
-    goto(I18, int_lit) = I36
-    goto(I18, float_lit) = I37
-    goto(I18, true) = I38
-    goto(I18, false) = I39
-    goto(I18, -) = I33
-    goto(I18, !) = I28
-    goto(I18, () = I34
-    goto(I18, expr) = I25
-    goto(I18, and_expr) = I26
-    goto(I18, not_expr) = I27
-    goto(I18, rel_expr) = I29
-    goto(I18, arith_expr) = I30
-    goto(I18, term) = I31
-    goto(I18, factor) = I32
+    goto(I37, id) = I58
+    goto(I37, int_lit) = I59
+    goto(I37, float_lit) = I60
+    goto(I37, true) = I61
+    goto(I37, false) = I62
+    goto(I37, -) = I56
+    goto(I37, !) = I51
+    goto(I37, () = I57
+    goto(I37, expr) = I78
+    goto(I37, and_expr) = I49
+    goto(I37, not_expr) = I50
+    goto(I37, rel_expr) = I52
+    goto(I37, arith_expr) = I53
+    goto(I37, term) = I54
+    goto(I37, factor) = I55
 
-I19:
-    if_stmt -> if ( . expr ) block
-    if_stmt -> if ( . expr ) block else block
+I38:
+    simple -> lvalue += . expr
     expr -> . expr || and_expr
     expr -> . and_expr
     and_expr -> . and_expr && not_expr
@@ -306,28 +708,31 @@ I19:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I19, id) = I35
-    goto(I19, int_lit) = I36
-    goto(I19, float_lit) = I37
-    goto(I19, true) = I38
-    goto(I19, false) = I39
-    goto(I19, -) = I33
-    goto(I19, !) = I28
-    goto(I19, () = I34
-    goto(I19, expr) = I40
-    goto(I19, and_expr) = I26
-    goto(I19, not_expr) = I27
-    goto(I19, rel_expr) = I29
-    goto(I19, arith_expr) = I30
-    goto(I19, term) = I31
-    goto(I19, factor) = I32
+    goto(I38, id) = I58
+    goto(I38, int_lit) = I59
+    goto(I38, float_lit) = I60
+    goto(I38, true) = I61
+    goto(I38, false) = I62
+    goto(I38, -) = I56
+    goto(I38, !) = I51
+    goto(I38, () = I57
+    goto(I38, expr) = I79
+    goto(I38, and_expr) = I49
+    goto(I38, not_expr) = I50
+    goto(I38, rel_expr) = I52
+    goto(I38, arith_expr) = I53
+    goto(I38, term) = I54
+    goto(I38, factor) = I55
 
-I20:
-    while_stmt -> while ( . expr ) block
+I39:
+    simple -> lvalue -= . expr
     expr -> . expr || and_expr
     expr -> . and_expr
     and_expr -> . and_expr && not_expr
@@ -346,64 +751,31 @@ I20:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I20, id) = I35
-    goto(I20, int_lit) = I36
-    goto(I20, float_lit) = I37
-    goto(I20, true) = I38
-    goto(I20, false) = I39
-    goto(I20, -) = I33
-    goto(I20, !) = I28
-    goto(I20, () = I34
-    goto(I20, expr) = I41
-    goto(I20, and_expr) = I26
-    goto(I20, not_expr) = I27
-    goto(I20, rel_expr) = I29
-    goto(I20, arith_expr) = I30
-    goto(I20, term) = I31
-    goto(I20, factor) = I32
+    goto(I39, id) = I58
+    goto(I39, int_lit) = I59
+    goto(I39, float_lit) = I60
+    goto(I39, true) = I61
+    goto(I39, false) = I62
+    goto(I39, -) = I56
+    goto(I39, !) = I51
+    goto(I39, () = I57
+    goto(I39, expr) = I80
+    goto(I39, and_expr) = I49
+    goto(I39, not_expr) = I50
+    goto(I39, rel_expr) = I52
+    goto(I39, arith_expr) = I53
+    goto(I39, term) = I54
+    goto(I39, factor) = I55
 
-I21:
-    stmt_list -> stmt_list . stmt
-    stmt -> . decl_stmt
-    stmt -> . assign_stmt
-    stmt -> . if_stmt
-    stmt -> . while_stmt
-    stmt -> . block
-    decl_stmt -> . type id = expr ;
-    decl_stmt -> . type id ;
-    type -> . int
-    type -> . float
-    assign_stmt -> . id = expr ;
-    if_stmt -> . if ( expr ) block
-    if_stmt -> . if ( expr ) block else block
-    while_stmt -> . while ( expr ) block
-    block -> . { stmt_list }
-    block -> { stmt_list . }
-    block -> . { }
-    goto(I21, id) = I12
-    goto(I21, int) = I10
-    goto(I21, float) = I11
-    goto(I21, if) = I13
-    goto(I21, while) = I14
-    goto(I21, {) = I15
-    goto(I21, }) = I42
-    goto(I21, stmt) = I16
-    goto(I21, decl_stmt) = I4
-    goto(I21, type) = I9
-    goto(I21, assign_stmt) = I5
-    goto(I21, if_stmt) = I6
-    goto(I21, while_stmt) = I7
-    goto(I21, block) = I8
-
-I22:
-    block -> { } .
-
-I23:
-    decl_stmt -> type id = . expr ;
+I40:
+    simple -> lvalue *= . expr
     expr -> . expr || and_expr
     expr -> . and_expr
     and_expr -> . and_expr && not_expr
@@ -422,44 +794,230 @@ I23:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I23, id) = I35
-    goto(I23, int_lit) = I36
-    goto(I23, float_lit) = I37
-    goto(I23, true) = I38
-    goto(I23, false) = I39
-    goto(I23, -) = I33
-    goto(I23, !) = I28
-    goto(I23, () = I34
-    goto(I23, expr) = I43
-    goto(I23, and_expr) = I26
-    goto(I23, not_expr) = I27
-    goto(I23, rel_expr) = I29
-    goto(I23, arith_expr) = I30
-    goto(I23, term) = I31
-    goto(I23, factor) = I32
+    goto(I40, id) = I58
+    goto(I40, int_lit) = I59
+    goto(I40, float_lit) = I60
+    goto(I40, true) = I61
+    goto(I40, false) = I62
+    goto(I40, -) = I56
+    goto(I40, !) = I51
+    goto(I40, () = I57
+    goto(I40, expr) = I81
+    goto(I40, and_expr) = I49
+    goto(I40, not_expr) = I50
+    goto(I40, rel_expr) = I52
+    goto(I40, arith_expr) = I53
+    goto(I40, term) = I54
+    goto(I40, factor) = I55
 
-I24:
-    decl_stmt -> type id ; .
+I41:
+    simple -> lvalue /= . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I41, id) = I58
+    goto(I41, int_lit) = I59
+    goto(I41, float_lit) = I60
+    goto(I41, true) = I61
+    goto(I41, false) = I62
+    goto(I41, -) = I56
+    goto(I41, !) = I51
+    goto(I41, () = I57
+    goto(I41, expr) = I82
+    goto(I41, and_expr) = I49
+    goto(I41, not_expr) = I50
+    goto(I41, rel_expr) = I52
+    goto(I41, arith_expr) = I53
+    goto(I41, term) = I54
+    goto(I41, factor) = I55
 
-I25:
-    assign_stmt -> id = expr . ;
+I42:
+    simple -> lvalue %= . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I42, id) = I58
+    goto(I42, int_lit) = I59
+    goto(I42, float_lit) = I60
+    goto(I42, true) = I61
+    goto(I42, false) = I62
+    goto(I42, -) = I56
+    goto(I42, !) = I51
+    goto(I42, () = I57
+    goto(I42, expr) = I83
+    goto(I42, and_expr) = I49
+    goto(I42, not_expr) = I50
+    goto(I42, rel_expr) = I52
+    goto(I42, arith_expr) = I53
+    goto(I42, term) = I54
+    goto(I42, factor) = I55
+
+I43:
+    simple -> lvalue ++ .
+
+I44:
+    simple -> lvalue -- .
+
+I45:
+    lvalue -> id [ . expr ]
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I45, id) = I58
+    goto(I45, int_lit) = I59
+    goto(I45, float_lit) = I60
+    goto(I45, true) = I61
+    goto(I45, false) = I62
+    goto(I45, -) = I56
+    goto(I45, !) = I51
+    goto(I45, () = I57
+    goto(I45, expr) = I84
+    goto(I45, and_expr) = I49
+    goto(I45, not_expr) = I50
+    goto(I45, rel_expr) = I52
+    goto(I45, arith_expr) = I53
+    goto(I45, term) = I54
+    goto(I45, factor) = I55
+
+I46:
+    call_stmt -> id ( . expr_list ) ;
+    call_stmt -> id ( . ) ;
+    expr_list -> . expr_list , expr
+    expr_list -> . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I46, id) = I58
+    goto(I46, int_lit) = I59
+    goto(I46, float_lit) = I60
+    goto(I46, true) = I61
+    goto(I46, false) = I62
+    goto(I46, -) = I56
+    goto(I46, !) = I51
+    goto(I46, () = I57
+    goto(I46, )) = I86
+    goto(I46, expr_list) = I85
+    goto(I46, expr) = I87
+    goto(I46, and_expr) = I49
+    goto(I46, not_expr) = I50
+    goto(I46, rel_expr) = I52
+    goto(I46, arith_expr) = I53
+    goto(I46, term) = I54
+    goto(I46, factor) = I55
+
+I47:
+    return_stmt -> return expr . ;
     expr -> expr . || and_expr
-    goto(I25, ||) = I45
-    goto(I25, ;) = I44
+    goto(I47, ||) = I89
+    goto(I47, ;) = I88
 
-I26:
+I48:
+    return_stmt -> return ; .
+
+I49:
     expr -> and_expr .
     and_expr -> and_expr . && not_expr
-    goto(I26, &&) = I46
+    goto(I49, &&) = I90
 
-I27:
+I50:
     and_expr -> not_expr .
 
-I28:
+I51:
     not_expr -> . ! not_expr
     not_expr -> ! . not_expr
     not_expr -> . rel_expr
@@ -475,28 +1033,31 @@ I28:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I28, id) = I35
-    goto(I28, int_lit) = I36
-    goto(I28, float_lit) = I37
-    goto(I28, true) = I38
-    goto(I28, false) = I39
-    goto(I28, -) = I33
-    goto(I28, !) = I28
-    goto(I28, () = I34
-    goto(I28, not_expr) = I47
-    goto(I28, rel_expr) = I29
-    goto(I28, arith_expr) = I30
-    goto(I28, term) = I31
-    goto(I28, factor) = I32
+    goto(I51, id) = I58
+    goto(I51, int_lit) = I59
+    goto(I51, float_lit) = I60
+    goto(I51, true) = I61
+    goto(I51, false) = I62
+    goto(I51, -) = I56
+    goto(I51, !) = I51
+    goto(I51, () = I57
+    goto(I51, not_expr) = I91
+    goto(I51, rel_expr) = I52
+    goto(I51, arith_expr) = I53
+    goto(I51, term) = I54
+    goto(I51, factor) = I55
 
-I29:
+I52:
     not_expr -> rel_expr .
 
-I30:
+I53:
     rel_expr -> arith_expr . relop arith_expr
     rel_expr -> arith_expr .
     relop -> . <
@@ -507,47 +1068,50 @@ I30:
     relop -> . !=
     arith_expr -> arith_expr . + term
     arith_expr -> arith_expr . - term
-    goto(I30, +) = I55
-    goto(I30, -) = I56
-    goto(I30, <) = I49
-    goto(I30, <=) = I50
-    goto(I30, >) = I51
-    goto(I30, >=) = I52
-    goto(I30, ==) = I53
-    goto(I30, !=) = I54
-    goto(I30, relop) = I48
+    goto(I53, +) = I99
+    goto(I53, -) = I100
+    goto(I53, <) = I93
+    goto(I53, <=) = I94
+    goto(I53, >) = I95
+    goto(I53, >=) = I96
+    goto(I53, ==) = I97
+    goto(I53, !=) = I98
+    goto(I53, relop) = I92
 
-I31:
+I54:
     arith_expr -> term .
     term -> term . * factor
     term -> term . / factor
     term -> term . % factor
-    goto(I31, *) = I57
-    goto(I31, /) = I58
-    goto(I31, %) = I59
+    goto(I54, *) = I101
+    goto(I54, /) = I102
+    goto(I54, %) = I103
 
-I32:
+I55:
     term -> factor .
 
-I33:
+I56:
     factor -> . - factor
     factor -> - . factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I33, id) = I35
-    goto(I33, int_lit) = I36
-    goto(I33, float_lit) = I37
-    goto(I33, true) = I38
-    goto(I33, false) = I39
-    goto(I33, -) = I33
-    goto(I33, () = I34
-    goto(I33, factor) = I60
+    goto(I56, id) = I58
+    goto(I56, int_lit) = I59
+    goto(I56, float_lit) = I60
+    goto(I56, true) = I61
+    goto(I56, false) = I62
+    goto(I56, -) = I56
+    goto(I56, () = I57
+    goto(I56, factor) = I104
 
-I34:
+I57:
     expr -> . expr || and_expr
     expr -> . and_expr
     and_expr -> . and_expr && not_expr
@@ -567,67 +1131,446 @@ I34:
     factor -> . ( expr )
     factor -> ( . expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I34, id) = I35
-    goto(I34, int_lit) = I36
-    goto(I34, float_lit) = I37
-    goto(I34, true) = I38
-    goto(I34, false) = I39
-    goto(I34, -) = I33
-    goto(I34, !) = I28
-    goto(I34, () = I34
-    goto(I34, expr) = I61
-    goto(I34, and_expr) = I26
-    goto(I34, not_expr) = I27
-    goto(I34, rel_expr) = I29
-    goto(I34, arith_expr) = I30
-    goto(I34, term) = I31
-    goto(I34, factor) = I32
+    goto(I57, id) = I58
+    goto(I57, int_lit) = I59
+    goto(I57, float_lit) = I60
+    goto(I57, true) = I61
+    goto(I57, false) = I62
+    goto(I57, -) = I56
+    goto(I57, !) = I51
+    goto(I57, () = I57
+    goto(I57, expr) = I105
+    goto(I57, and_expr) = I49
+    goto(I57, not_expr) = I50
+    goto(I57, rel_expr) = I52
+    goto(I57, arith_expr) = I53
+    goto(I57, term) = I54
+    goto(I57, factor) = I55
 
-I35:
+I58:
     factor -> id .
+    factor -> id . [ expr ]
+    factor -> id . ( expr_list )
+    factor -> id . ( )
+    goto(I58, () = I107
+    goto(I58, [) = I106
 
-I36:
+I59:
     factor -> int_lit .
 
-I37:
+I60:
     factor -> float_lit .
 
-I38:
+I61:
     factor -> true .
 
-I39:
+I62:
     factor -> false .
 
-I40:
-    if_stmt -> if ( expr . ) block
-    if_stmt -> if ( expr . ) block else block
+I63:
+    print_stmt -> print ( . expr ) ;
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I63, id) = I58
+    goto(I63, int_lit) = I59
+    goto(I63, float_lit) = I60
+    goto(I63, true) = I61
+    goto(I63, false) = I62
+    goto(I63, -) = I56
+    goto(I63, !) = I51
+    goto(I63, () = I57
+    goto(I63, expr) = I108
+    goto(I63, and_expr) = I49
+    goto(I63, not_expr) = I50
+    goto(I63, rel_expr) = I52
+    goto(I63, arith_expr) = I53
+    goto(I63, term) = I54
+    goto(I63, factor) = I55
+
+I64:
+    break_stmt -> break ; .
+
+I65:
+    continue_stmt -> continue ; .
+
+I66:
+    type -> . int
+    type -> . float
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    for_stmt -> for ( . for_init ; expr ; simple ) stmt
+    for_init -> . simple
+    for_init -> . type id = expr
+    goto(I66, id) = I109
+    goto(I66, int) = I20
+    goto(I66, float) = I21
+    goto(I66, type) = I112
+    goto(I66, simple) = I111
+    goto(I66, lvalue) = I23
+    goto(I66, for_init) = I110
+
+I67:
+    if_stmt -> if ( . expr ) stmt
+    if_stmt -> if ( . expr ) stmt else stmt
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I67, id) = I58
+    goto(I67, int_lit) = I59
+    goto(I67, float_lit) = I60
+    goto(I67, true) = I61
+    goto(I67, false) = I62
+    goto(I67, -) = I56
+    goto(I67, !) = I51
+    goto(I67, () = I57
+    goto(I67, expr) = I113
+    goto(I67, and_expr) = I49
+    goto(I67, not_expr) = I50
+    goto(I67, rel_expr) = I52
+    goto(I67, arith_expr) = I53
+    goto(I67, term) = I54
+    goto(I67, factor) = I55
+
+I68:
+    while_stmt -> while ( . expr ) stmt
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I68, id) = I58
+    goto(I68, int_lit) = I59
+    goto(I68, float_lit) = I60
+    goto(I68, true) = I61
+    goto(I68, false) = I62
+    goto(I68, -) = I56
+    goto(I68, !) = I51
+    goto(I68, () = I57
+    goto(I68, expr) = I114
+    goto(I68, and_expr) = I49
+    goto(I68, not_expr) = I50
+    goto(I68, rel_expr) = I52
+    goto(I68, arith_expr) = I53
+    goto(I68, term) = I54
+    goto(I68, factor) = I55
+
+I69:
+    stmt_list -> stmt_list . stmt
+    stmt -> . decl_stmt
+    stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
+    stmt -> . if_stmt
+    stmt -> . while_stmt
+    stmt -> . block
+    decl_stmt -> . type id = expr ;
+    decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
+    type -> . int
+    type -> . float
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    while_stmt -> . while ( expr ) stmt
+    block -> . { stmt_list }
+    block -> { stmt_list . }
+    block -> . { }
+    goto(I69, id) = I24
+    goto(I69, int) = I20
+    goto(I69, float) = I21
+    goto(I69, if) = I30
+    goto(I69, while) = I31
+    goto(I69, return) = I25
+    goto(I69, for) = I29
+    goto(I69, print) = I26
+    goto(I69, break) = I27
+    goto(I69, continue) = I28
+    goto(I69, {) = I32
+    goto(I69, }) = I116
+    goto(I69, stmt) = I115
+    goto(I69, decl_stmt) = I9
+    goto(I69, type) = I71
+    goto(I69, assign_stmt) = I10
+    goto(I69, simple) = I22
+    goto(I69, lvalue) = I23
+    goto(I69, call_stmt) = I11
+    goto(I69, return_stmt) = I12
+    goto(I69, print_stmt) = I13
+    goto(I69, break_stmt) = I14
+    goto(I69, continue_stmt) = I15
+    goto(I69, for_stmt) = I16
+    goto(I69, if_stmt) = I17
+    goto(I69, while_stmt) = I18
+    goto(I69, block) = I19
+
+I70:
+    stmt_list -> stmt .
+
+I71:
+    decl_stmt -> type . id = expr ;
+    decl_stmt -> type . id ;
+    decl_stmt -> type . id [ int_lit ] ;
+    decl_stmt -> type . id [ int_lit ] = { expr_list } ;
+    decl_stmt -> type . id [ ] = { expr_list } ;
+    goto(I71, id) = I117
+
+I72:
+    block -> { } .
+
+I73:
+    func_def -> type id ( . params ) block
+    func_def -> type id ( . ) block
+    func_def -> type id ( . void ) block
+    func_proto -> type id ( . void ) ;
+    func_proto -> type id ( . params ) ;
+    func_proto -> type id ( . ) ;
+    params -> . params , param
+    params -> . param
+    param -> . type id
+    param -> . type id [ ]
+    type -> . int
+    type -> . float
+    goto(I73, int) = I20
+    goto(I73, float) = I21
+    goto(I73, void) = I120
+    goto(I73, )) = I119
+    goto(I73, params) = I118
+    goto(I73, param) = I121
+    goto(I73, type) = I122
+
+I74:
+    decl_stmt -> type id = . expr ;
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I74, id) = I58
+    goto(I74, int_lit) = I59
+    goto(I74, float_lit) = I60
+    goto(I74, true) = I61
+    goto(I74, false) = I62
+    goto(I74, -) = I56
+    goto(I74, !) = I51
+    goto(I74, () = I57
+    goto(I74, expr) = I123
+    goto(I74, and_expr) = I49
+    goto(I74, not_expr) = I50
+    goto(I74, rel_expr) = I52
+    goto(I74, arith_expr) = I53
+    goto(I74, term) = I54
+    goto(I74, factor) = I55
+
+I75:
+    decl_stmt -> type id ; .
+
+I76:
+    decl_stmt -> type id [ . int_lit ] ;
+    decl_stmt -> type id [ . int_lit ] = { expr_list } ;
+    decl_stmt -> type id [ . ] = { expr_list } ;
+    goto(I76, int_lit) = I124
+    goto(I76, ]) = I125
+
+I77:
+    func_def -> void id ( . params ) block
+    func_def -> void id ( . ) block
+    func_def -> void id ( . void ) block
+    func_proto -> void id ( . void ) ;
+    func_proto -> void id ( . params ) ;
+    func_proto -> void id ( . ) ;
+    params -> . params , param
+    params -> . param
+    param -> . type id
+    param -> . type id [ ]
+    type -> . int
+    type -> . float
+    goto(I77, int) = I20
+    goto(I77, float) = I21
+    goto(I77, void) = I128
+    goto(I77, )) = I127
+    goto(I77, params) = I126
+    goto(I77, param) = I121
+    goto(I77, type) = I122
+
+I78:
+    simple -> lvalue = expr .
     expr -> expr . || and_expr
-    goto(I40, ||) = I45
-    goto(I40, )) = I62
+    goto(I78, ||) = I89
 
-I41:
-    while_stmt -> while ( expr . ) block
+I79:
+    simple -> lvalue += expr .
     expr -> expr . || and_expr
-    goto(I41, ||) = I45
-    goto(I41, )) = I63
+    goto(I79, ||) = I89
 
-I42:
-    block -> { stmt_list } .
-
-I43:
-    decl_stmt -> type id = expr . ;
+I80:
+    simple -> lvalue -= expr .
     expr -> expr . || and_expr
-    goto(I43, ||) = I45
-    goto(I43, ;) = I64
+    goto(I80, ||) = I89
 
-I44:
-    assign_stmt -> id = expr ; .
+I81:
+    simple -> lvalue *= expr .
+    expr -> expr . || and_expr
+    goto(I81, ||) = I89
 
-I45:
+I82:
+    simple -> lvalue /= expr .
+    expr -> expr . || and_expr
+    goto(I82, ||) = I89
+
+I83:
+    simple -> lvalue %= expr .
+    expr -> expr . || and_expr
+    goto(I83, ||) = I89
+
+I84:
+    lvalue -> id [ expr . ]
+    expr -> expr . || and_expr
+    goto(I84, ||) = I89
+    goto(I84, ]) = I129
+
+I85:
+    call_stmt -> id ( expr_list . ) ;
+    expr_list -> expr_list . , expr
+    goto(I85, )) = I130
+    goto(I85, ,) = I131
+
+I86:
+    call_stmt -> id ( ) . ;
+    goto(I86, ;) = I132
+
+I87:
+    expr_list -> expr .
+    expr -> expr . || and_expr
+    goto(I87, ||) = I89
+
+I88:
+    return_stmt -> return expr ; .
+
+I89:
     expr -> expr || . and_expr
     and_expr -> . and_expr && not_expr
     and_expr -> . not_expr
@@ -645,26 +1588,29 @@ I45:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I45, id) = I35
-    goto(I45, int_lit) = I36
-    goto(I45, float_lit) = I37
-    goto(I45, true) = I38
-    goto(I45, false) = I39
-    goto(I45, -) = I33
-    goto(I45, !) = I28
-    goto(I45, () = I34
-    goto(I45, and_expr) = I65
-    goto(I45, not_expr) = I27
-    goto(I45, rel_expr) = I29
-    goto(I45, arith_expr) = I30
-    goto(I45, term) = I31
-    goto(I45, factor) = I32
+    goto(I89, id) = I58
+    goto(I89, int_lit) = I59
+    goto(I89, float_lit) = I60
+    goto(I89, true) = I61
+    goto(I89, false) = I62
+    goto(I89, -) = I56
+    goto(I89, !) = I51
+    goto(I89, () = I57
+    goto(I89, and_expr) = I133
+    goto(I89, not_expr) = I50
+    goto(I89, rel_expr) = I52
+    goto(I89, arith_expr) = I53
+    goto(I89, term) = I54
+    goto(I89, factor) = I55
 
-I46:
+I90:
     and_expr -> and_expr && . not_expr
     not_expr -> . ! not_expr
     not_expr -> . rel_expr
@@ -680,28 +1626,31 @@ I46:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I46, id) = I35
-    goto(I46, int_lit) = I36
-    goto(I46, float_lit) = I37
-    goto(I46, true) = I38
-    goto(I46, false) = I39
-    goto(I46, -) = I33
-    goto(I46, !) = I28
-    goto(I46, () = I34
-    goto(I46, not_expr) = I66
-    goto(I46, rel_expr) = I29
-    goto(I46, arith_expr) = I30
-    goto(I46, term) = I31
-    goto(I46, factor) = I32
+    goto(I90, id) = I58
+    goto(I90, int_lit) = I59
+    goto(I90, float_lit) = I60
+    goto(I90, true) = I61
+    goto(I90, false) = I62
+    goto(I90, -) = I56
+    goto(I90, !) = I51
+    goto(I90, () = I57
+    goto(I90, not_expr) = I134
+    goto(I90, rel_expr) = I52
+    goto(I90, arith_expr) = I53
+    goto(I90, term) = I54
+    goto(I90, factor) = I55
 
-I47:
+I91:
     not_expr -> ! not_expr .
 
-I48:
+I92:
     rel_expr -> arith_expr relop . arith_expr
     arith_expr -> . arith_expr + term
     arith_expr -> . arith_expr - term
@@ -713,40 +1662,43 @@ I48:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I48, id) = I35
-    goto(I48, int_lit) = I36
-    goto(I48, float_lit) = I37
-    goto(I48, true) = I38
-    goto(I48, false) = I39
-    goto(I48, -) = I33
-    goto(I48, () = I34
-    goto(I48, arith_expr) = I67
-    goto(I48, term) = I31
-    goto(I48, factor) = I32
+    goto(I92, id) = I58
+    goto(I92, int_lit) = I59
+    goto(I92, float_lit) = I60
+    goto(I92, true) = I61
+    goto(I92, false) = I62
+    goto(I92, -) = I56
+    goto(I92, () = I57
+    goto(I92, arith_expr) = I135
+    goto(I92, term) = I54
+    goto(I92, factor) = I55
 
-I49:
+I93:
     relop -> < .
 
-I50:
+I94:
     relop -> <= .
 
-I51:
+I95:
     relop -> > .
 
-I52:
+I96:
     relop -> >= .
 
-I53:
+I97:
     relop -> == .
 
-I54:
+I98:
     relop -> != .
 
-I55:
+I99:
     arith_expr -> arith_expr + . term
     term -> . term * factor
     term -> . term / factor
@@ -755,21 +1707,24 @@ I55:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I55, id) = I35
-    goto(I55, int_lit) = I36
-    goto(I55, float_lit) = I37
-    goto(I55, true) = I38
-    goto(I55, false) = I39
-    goto(I55, -) = I33
-    goto(I55, () = I34
-    goto(I55, term) = I68
-    goto(I55, factor) = I32
+    goto(I99, id) = I58
+    goto(I99, int_lit) = I59
+    goto(I99, float_lit) = I60
+    goto(I99, true) = I61
+    goto(I99, false) = I62
+    goto(I99, -) = I56
+    goto(I99, () = I57
+    goto(I99, term) = I136
+    goto(I99, factor) = I55
 
-I56:
+I100:
     arith_expr -> arith_expr - . term
     term -> . term * factor
     term -> . term / factor
@@ -778,242 +1733,1294 @@ I56:
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I56, id) = I35
-    goto(I56, int_lit) = I36
-    goto(I56, float_lit) = I37
-    goto(I56, true) = I38
-    goto(I56, false) = I39
-    goto(I56, -) = I33
-    goto(I56, () = I34
-    goto(I56, term) = I69
-    goto(I56, factor) = I32
+    goto(I100, id) = I58
+    goto(I100, int_lit) = I59
+    goto(I100, float_lit) = I60
+    goto(I100, true) = I61
+    goto(I100, false) = I62
+    goto(I100, -) = I56
+    goto(I100, () = I57
+    goto(I100, term) = I137
+    goto(I100, factor) = I55
 
-I57:
+I101:
     term -> term * . factor
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I57, id) = I35
-    goto(I57, int_lit) = I36
-    goto(I57, float_lit) = I37
-    goto(I57, true) = I38
-    goto(I57, false) = I39
-    goto(I57, -) = I33
-    goto(I57, () = I34
-    goto(I57, factor) = I70
+    goto(I101, id) = I58
+    goto(I101, int_lit) = I59
+    goto(I101, float_lit) = I60
+    goto(I101, true) = I61
+    goto(I101, false) = I62
+    goto(I101, -) = I56
+    goto(I101, () = I57
+    goto(I101, factor) = I138
 
-I58:
+I102:
     term -> term / . factor
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I58, id) = I35
-    goto(I58, int_lit) = I36
-    goto(I58, float_lit) = I37
-    goto(I58, true) = I38
-    goto(I58, false) = I39
-    goto(I58, -) = I33
-    goto(I58, () = I34
-    goto(I58, factor) = I71
+    goto(I102, id) = I58
+    goto(I102, int_lit) = I59
+    goto(I102, float_lit) = I60
+    goto(I102, true) = I61
+    goto(I102, false) = I62
+    goto(I102, -) = I56
+    goto(I102, () = I57
+    goto(I102, factor) = I139
 
-I59:
+I103:
     term -> term % . factor
     factor -> . - factor
     factor -> . ( expr )
     factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
     factor -> . int_lit
     factor -> . float_lit
     factor -> . true
     factor -> . false
-    goto(I59, id) = I35
-    goto(I59, int_lit) = I36
-    goto(I59, float_lit) = I37
-    goto(I59, true) = I38
-    goto(I59, false) = I39
-    goto(I59, -) = I33
-    goto(I59, () = I34
-    goto(I59, factor) = I72
+    goto(I103, id) = I58
+    goto(I103, int_lit) = I59
+    goto(I103, float_lit) = I60
+    goto(I103, true) = I61
+    goto(I103, false) = I62
+    goto(I103, -) = I56
+    goto(I103, () = I57
+    goto(I103, factor) = I140
 
-I60:
+I104:
     factor -> - factor .
 
-I61:
+I105:
     expr -> expr . || and_expr
     factor -> ( expr . )
-    goto(I61, ||) = I45
-    goto(I61, )) = I73
+    goto(I105, ||) = I89
+    goto(I105, )) = I141
 
-I62:
-    if_stmt -> if ( expr ) . block
-    if_stmt -> if ( expr ) . block else block
+I106:
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> id [ . expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I106, id) = I58
+    goto(I106, int_lit) = I59
+    goto(I106, float_lit) = I60
+    goto(I106, true) = I61
+    goto(I106, false) = I62
+    goto(I106, -) = I56
+    goto(I106, !) = I51
+    goto(I106, () = I57
+    goto(I106, expr) = I142
+    goto(I106, and_expr) = I49
+    goto(I106, not_expr) = I50
+    goto(I106, rel_expr) = I52
+    goto(I106, arith_expr) = I53
+    goto(I106, term) = I54
+    goto(I106, factor) = I55
+
+I107:
+    expr_list -> . expr_list , expr
+    expr_list -> . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> id ( . expr_list )
+    factor -> . id ( )
+    factor -> id ( . )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I107, id) = I58
+    goto(I107, int_lit) = I59
+    goto(I107, float_lit) = I60
+    goto(I107, true) = I61
+    goto(I107, false) = I62
+    goto(I107, -) = I56
+    goto(I107, !) = I51
+    goto(I107, () = I57
+    goto(I107, )) = I144
+    goto(I107, expr_list) = I143
+    goto(I107, expr) = I87
+    goto(I107, and_expr) = I49
+    goto(I107, not_expr) = I50
+    goto(I107, rel_expr) = I52
+    goto(I107, arith_expr) = I53
+    goto(I107, term) = I54
+    goto(I107, factor) = I55
+
+I108:
+    print_stmt -> print ( expr . ) ;
+    expr -> expr . || and_expr
+    goto(I108, ||) = I89
+    goto(I108, )) = I145
+
+I109:
+    lvalue -> id .
+    lvalue -> id . [ expr ]
+    goto(I109, [) = I45
+
+I110:
+    for_stmt -> for ( for_init . ; expr ; simple ) stmt
+    goto(I110, ;) = I146
+
+I111:
+    for_init -> simple .
+
+I112:
+    for_init -> type . id = expr
+    goto(I112, id) = I147
+
+I113:
+    if_stmt -> if ( expr . ) stmt
+    if_stmt -> if ( expr . ) stmt else stmt
+    expr -> expr . || and_expr
+    goto(I113, ||) = I89
+    goto(I113, )) = I148
+
+I114:
+    while_stmt -> while ( expr . ) stmt
+    expr -> expr . || and_expr
+    goto(I114, ||) = I89
+    goto(I114, )) = I149
+
+I115:
+    stmt_list -> stmt_list stmt .
+
+I116:
+    block -> { stmt_list } .
+
+I117:
+    decl_stmt -> type id . = expr ;
+    decl_stmt -> type id . ;
+    decl_stmt -> type id . [ int_lit ] ;
+    decl_stmt -> type id . [ int_lit ] = { expr_list } ;
+    decl_stmt -> type id . [ ] = { expr_list } ;
+    goto(I117, =) = I74
+    goto(I117, [) = I76
+    goto(I117, ;) = I75
+
+I118:
+    func_def -> type id ( params . ) block
+    func_proto -> type id ( params . ) ;
+    params -> params . , param
+    goto(I118, )) = I150
+    goto(I118, ,) = I151
+
+I119:
+    func_def -> type id ( ) . block
+    func_proto -> type id ( ) . ;
     block -> . { stmt_list }
     block -> . { }
-    goto(I62, {) = I15
-    goto(I62, block) = I74
+    goto(I119, {) = I32
+    goto(I119, ;) = I153
+    goto(I119, block) = I152
 
-I63:
-    while_stmt -> while ( expr ) . block
+I120:
+    func_def -> type id ( void . ) block
+    func_proto -> type id ( void . ) ;
+    goto(I120, )) = I154
+
+I121:
+    params -> param .
+
+I122:
+    param -> type . id
+    param -> type . id [ ]
+    goto(I122, id) = I155
+
+I123:
+    decl_stmt -> type id = expr . ;
+    expr -> expr . || and_expr
+    goto(I123, ||) = I89
+    goto(I123, ;) = I156
+
+I124:
+    decl_stmt -> type id [ int_lit . ] ;
+    decl_stmt -> type id [ int_lit . ] = { expr_list } ;
+    goto(I124, ]) = I157
+
+I125:
+    decl_stmt -> type id [ ] . = { expr_list } ;
+    goto(I125, =) = I158
+
+I126:
+    func_def -> void id ( params . ) block
+    func_proto -> void id ( params . ) ;
+    params -> params . , param
+    goto(I126, )) = I159
+    goto(I126, ,) = I151
+
+I127:
+    func_def -> void id ( ) . block
+    func_proto -> void id ( ) . ;
     block -> . { stmt_list }
     block -> . { }
-    goto(I63, {) = I15
-    goto(I63, block) = I75
+    goto(I127, {) = I32
+    goto(I127, ;) = I161
+    goto(I127, block) = I160
 
-I64:
-    decl_stmt -> type id = expr ; .
+I128:
+    func_def -> void id ( void . ) block
+    func_proto -> void id ( void . ) ;
+    goto(I128, )) = I162
 
-I65:
+I129:
+    lvalue -> id [ expr ] .
+
+I130:
+    call_stmt -> id ( expr_list ) . ;
+    goto(I130, ;) = I163
+
+I131:
+    expr_list -> expr_list , . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I131, id) = I58
+    goto(I131, int_lit) = I59
+    goto(I131, float_lit) = I60
+    goto(I131, true) = I61
+    goto(I131, false) = I62
+    goto(I131, -) = I56
+    goto(I131, !) = I51
+    goto(I131, () = I57
+    goto(I131, expr) = I164
+    goto(I131, and_expr) = I49
+    goto(I131, not_expr) = I50
+    goto(I131, rel_expr) = I52
+    goto(I131, arith_expr) = I53
+    goto(I131, term) = I54
+    goto(I131, factor) = I55
+
+I132:
+    call_stmt -> id ( ) ; .
+
+I133:
     expr -> expr || and_expr .
     and_expr -> and_expr . && not_expr
-    goto(I65, &&) = I46
+    goto(I133, &&) = I90
 
-I66:
+I134:
     and_expr -> and_expr && not_expr .
 
-I67:
+I135:
     rel_expr -> arith_expr relop arith_expr .
     arith_expr -> arith_expr . + term
     arith_expr -> arith_expr . - term
-    goto(I67, +) = I55
-    goto(I67, -) = I56
+    goto(I135, +) = I99
+    goto(I135, -) = I100
 
-I68:
+I136:
     arith_expr -> arith_expr + term .
     term -> term . * factor
     term -> term . / factor
     term -> term . % factor
-    goto(I68, *) = I57
-    goto(I68, /) = I58
-    goto(I68, %) = I59
+    goto(I136, *) = I101
+    goto(I136, /) = I102
+    goto(I136, %) = I103
 
-I69:
+I137:
     arith_expr -> arith_expr - term .
     term -> term . * factor
     term -> term . / factor
     term -> term . % factor
-    goto(I69, *) = I57
-    goto(I69, /) = I58
-    goto(I69, %) = I59
+    goto(I137, *) = I101
+    goto(I137, /) = I102
+    goto(I137, %) = I103
 
-I70:
+I138:
     term -> term * factor .
 
-I71:
+I139:
     term -> term / factor .
 
-I72:
+I140:
     term -> term % factor .
 
-I73:
+I141:
     factor -> ( expr ) .
 
-I74:
-    if_stmt -> if ( expr ) block .
-    if_stmt -> if ( expr ) block . else block
-    goto(I74, else) = I76
+I142:
+    expr -> expr . || and_expr
+    factor -> id [ expr . ]
+    goto(I142, ||) = I89
+    goto(I142, ]) = I165
 
-I75:
-    while_stmt -> while ( expr ) block .
+I143:
+    expr_list -> expr_list . , expr
+    factor -> id ( expr_list . )
+    goto(I143, )) = I166
+    goto(I143, ,) = I131
 
-I76:
-    if_stmt -> if ( expr ) block else . block
+I144:
+    factor -> id ( ) .
+
+I145:
+    print_stmt -> print ( expr ) . ;
+    goto(I145, ;) = I167
+
+I146:
+    for_stmt -> for ( for_init ; . expr ; simple ) stmt
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I146, id) = I58
+    goto(I146, int_lit) = I59
+    goto(I146, float_lit) = I60
+    goto(I146, true) = I61
+    goto(I146, false) = I62
+    goto(I146, -) = I56
+    goto(I146, !) = I51
+    goto(I146, () = I57
+    goto(I146, expr) = I168
+    goto(I146, and_expr) = I49
+    goto(I146, not_expr) = I50
+    goto(I146, rel_expr) = I52
+    goto(I146, arith_expr) = I53
+    goto(I146, term) = I54
+    goto(I146, factor) = I55
+
+I147:
+    for_init -> type id . = expr
+    goto(I147, =) = I169
+
+I148:
+    stmt -> . decl_stmt
+    stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
+    stmt -> . if_stmt
+    stmt -> . while_stmt
+    stmt -> . block
+    decl_stmt -> . type id = expr ;
+    decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
+    type -> . int
+    type -> . float
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> if ( expr ) . stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    if_stmt -> if ( expr ) . stmt else stmt
+    while_stmt -> . while ( expr ) stmt
     block -> . { stmt_list }
     block -> . { }
-    goto(I76, {) = I15
-    goto(I76, block) = I77
+    goto(I148, id) = I24
+    goto(I148, int) = I20
+    goto(I148, float) = I21
+    goto(I148, if) = I30
+    goto(I148, while) = I31
+    goto(I148, return) = I25
+    goto(I148, for) = I29
+    goto(I148, print) = I26
+    goto(I148, break) = I27
+    goto(I148, continue) = I28
+    goto(I148, {) = I32
+    goto(I148, stmt) = I170
+    goto(I148, decl_stmt) = I9
+    goto(I148, type) = I71
+    goto(I148, assign_stmt) = I10
+    goto(I148, simple) = I22
+    goto(I148, lvalue) = I23
+    goto(I148, call_stmt) = I11
+    goto(I148, return_stmt) = I12
+    goto(I148, print_stmt) = I13
+    goto(I148, break_stmt) = I14
+    goto(I148, continue_stmt) = I15
+    goto(I148, for_stmt) = I16
+    goto(I148, if_stmt) = I17
+    goto(I148, while_stmt) = I18
+    goto(I148, block) = I19
 
-I77:
-    if_stmt -> if ( expr ) block else block .
+I149:
+    stmt -> . decl_stmt
+    stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
+    stmt -> . if_stmt
+    stmt -> . while_stmt
+    stmt -> . block
+    decl_stmt -> . type id = expr ;
+    decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
+    type -> . int
+    type -> . float
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    while_stmt -> . while ( expr ) stmt
+    while_stmt -> while ( expr ) . stmt
+    block -> . { stmt_list }
+    block -> . { }
+    goto(I149, id) = I24
+    goto(I149, int) = I20
+    goto(I149, float) = I21
+    goto(I149, if) = I30
+    goto(I149, while) = I31
+    goto(I149, return) = I25
+    goto(I149, for) = I29
+    goto(I149, print) = I26
+    goto(I149, break) = I27
+    goto(I149, continue) = I28
+    goto(I149, {) = I32
+    goto(I149, stmt) = I171
+    goto(I149, decl_stmt) = I9
+    goto(I149, type) = I71
+    goto(I149, assign_stmt) = I10
+    goto(I149, simple) = I22
+    goto(I149, lvalue) = I23
+    goto(I149, call_stmt) = I11
+    goto(I149, return_stmt) = I12
+    goto(I149, print_stmt) = I13
+    goto(I149, break_stmt) = I14
+    goto(I149, continue_stmt) = I15
+    goto(I149, for_stmt) = I16
+    goto(I149, if_stmt) = I17
+    goto(I149, while_stmt) = I18
+    goto(I149, block) = I19
+
+I150:
+    func_def -> type id ( params ) . block
+    func_proto -> type id ( params ) . ;
+    block -> . { stmt_list }
+    block -> . { }
+    goto(I150, {) = I32
+    goto(I150, ;) = I173
+    goto(I150, block) = I172
+
+I151:
+    params -> params , . param
+    param -> . type id
+    param -> . type id [ ]
+    type -> . int
+    type -> . float
+    goto(I151, int) = I20
+    goto(I151, float) = I21
+    goto(I151, param) = I174
+    goto(I151, type) = I122
+
+I152:
+    func_def -> type id ( ) block .
+
+I153:
+    func_proto -> type id ( ) ; .
+
+I154:
+    func_def -> type id ( void ) . block
+    func_proto -> type id ( void ) . ;
+    block -> . { stmt_list }
+    block -> . { }
+    goto(I154, {) = I32
+    goto(I154, ;) = I176
+    goto(I154, block) = I175
+
+I155:
+    param -> type id .
+    param -> type id . [ ]
+    goto(I155, [) = I177
+
+I156:
+    decl_stmt -> type id = expr ; .
+
+I157:
+    decl_stmt -> type id [ int_lit ] . ;
+    decl_stmt -> type id [ int_lit ] . = { expr_list } ;
+    goto(I157, =) = I179
+    goto(I157, ;) = I178
+
+I158:
+    decl_stmt -> type id [ ] = . { expr_list } ;
+    goto(I158, {) = I180
+
+I159:
+    func_def -> void id ( params ) . block
+    func_proto -> void id ( params ) . ;
+    block -> . { stmt_list }
+    block -> . { }
+    goto(I159, {) = I32
+    goto(I159, ;) = I182
+    goto(I159, block) = I181
+
+I160:
+    func_def -> void id ( ) block .
+
+I161:
+    func_proto -> void id ( ) ; .
+
+I162:
+    func_def -> void id ( void ) . block
+    func_proto -> void id ( void ) . ;
+    block -> . { stmt_list }
+    block -> . { }
+    goto(I162, {) = I32
+    goto(I162, ;) = I184
+    goto(I162, block) = I183
+
+I163:
+    call_stmt -> id ( expr_list ) ; .
+
+I164:
+    expr_list -> expr_list , expr .
+    expr -> expr . || and_expr
+    goto(I164, ||) = I89
+
+I165:
+    factor -> id [ expr ] .
+
+I166:
+    factor -> id ( expr_list ) .
+
+I167:
+    print_stmt -> print ( expr ) ; .
+
+I168:
+    for_stmt -> for ( for_init ; expr . ; simple ) stmt
+    expr -> expr . || and_expr
+    goto(I168, ||) = I89
+    goto(I168, ;) = I185
+
+I169:
+    for_init -> type id = . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I169, id) = I58
+    goto(I169, int_lit) = I59
+    goto(I169, float_lit) = I60
+    goto(I169, true) = I61
+    goto(I169, false) = I62
+    goto(I169, -) = I56
+    goto(I169, !) = I51
+    goto(I169, () = I57
+    goto(I169, expr) = I186
+    goto(I169, and_expr) = I49
+    goto(I169, not_expr) = I50
+    goto(I169, rel_expr) = I52
+    goto(I169, arith_expr) = I53
+    goto(I169, term) = I54
+    goto(I169, factor) = I55
+
+I170:
+    if_stmt -> if ( expr ) stmt .
+    if_stmt -> if ( expr ) stmt . else stmt
+    goto(I170, else) = I187
+
+I171:
+    while_stmt -> while ( expr ) stmt .
+
+I172:
+    func_def -> type id ( params ) block .
+
+I173:
+    func_proto -> type id ( params ) ; .
+
+I174:
+    params -> params , param .
+
+I175:
+    func_def -> type id ( void ) block .
+
+I176:
+    func_proto -> type id ( void ) ; .
+
+I177:
+    param -> type id [ . ]
+    goto(I177, ]) = I188
+
+I178:
+    decl_stmt -> type id [ int_lit ] ; .
+
+I179:
+    decl_stmt -> type id [ int_lit ] = . { expr_list } ;
+    goto(I179, {) = I189
+
+I180:
+    decl_stmt -> type id [ ] = { . expr_list } ;
+    expr_list -> . expr_list , expr
+    expr_list -> . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I180, id) = I58
+    goto(I180, int_lit) = I59
+    goto(I180, float_lit) = I60
+    goto(I180, true) = I61
+    goto(I180, false) = I62
+    goto(I180, -) = I56
+    goto(I180, !) = I51
+    goto(I180, () = I57
+    goto(I180, expr_list) = I190
+    goto(I180, expr) = I87
+    goto(I180, and_expr) = I49
+    goto(I180, not_expr) = I50
+    goto(I180, rel_expr) = I52
+    goto(I180, arith_expr) = I53
+    goto(I180, term) = I54
+    goto(I180, factor) = I55
+
+I181:
+    func_def -> void id ( params ) block .
+
+I182:
+    func_proto -> void id ( params ) ; .
+
+I183:
+    func_def -> void id ( void ) block .
+
+I184:
+    func_proto -> void id ( void ) ; .
+
+I185:
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    for_stmt -> for ( for_init ; expr ; . simple ) stmt
+    goto(I185, id) = I109
+    goto(I185, simple) = I191
+    goto(I185, lvalue) = I23
+
+I186:
+    for_init -> type id = expr .
+    expr -> expr . || and_expr
+    goto(I186, ||) = I89
+
+I187:
+    stmt -> . decl_stmt
+    stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
+    stmt -> . if_stmt
+    stmt -> . while_stmt
+    stmt -> . block
+    decl_stmt -> . type id = expr ;
+    decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
+    type -> . int
+    type -> . float
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    if_stmt -> if ( expr ) stmt else . stmt
+    while_stmt -> . while ( expr ) stmt
+    block -> . { stmt_list }
+    block -> . { }
+    goto(I187, id) = I24
+    goto(I187, int) = I20
+    goto(I187, float) = I21
+    goto(I187, if) = I30
+    goto(I187, while) = I31
+    goto(I187, return) = I25
+    goto(I187, for) = I29
+    goto(I187, print) = I26
+    goto(I187, break) = I27
+    goto(I187, continue) = I28
+    goto(I187, {) = I32
+    goto(I187, stmt) = I192
+    goto(I187, decl_stmt) = I9
+    goto(I187, type) = I71
+    goto(I187, assign_stmt) = I10
+    goto(I187, simple) = I22
+    goto(I187, lvalue) = I23
+    goto(I187, call_stmt) = I11
+    goto(I187, return_stmt) = I12
+    goto(I187, print_stmt) = I13
+    goto(I187, break_stmt) = I14
+    goto(I187, continue_stmt) = I15
+    goto(I187, for_stmt) = I16
+    goto(I187, if_stmt) = I17
+    goto(I187, while_stmt) = I18
+    goto(I187, block) = I19
+
+I188:
+    param -> type id [ ] .
+
+I189:
+    decl_stmt -> type id [ int_lit ] = { . expr_list } ;
+    expr_list -> . expr_list , expr
+    expr_list -> . expr
+    expr -> . expr || and_expr
+    expr -> . and_expr
+    and_expr -> . and_expr && not_expr
+    and_expr -> . not_expr
+    not_expr -> . ! not_expr
+    not_expr -> . rel_expr
+    rel_expr -> . arith_expr relop arith_expr
+    rel_expr -> . arith_expr
+    arith_expr -> . arith_expr + term
+    arith_expr -> . arith_expr - term
+    arith_expr -> . term
+    term -> . term * factor
+    term -> . term / factor
+    term -> . term % factor
+    term -> . factor
+    factor -> . - factor
+    factor -> . ( expr )
+    factor -> . id
+    factor -> . id [ expr ]
+    factor -> . id ( expr_list )
+    factor -> . id ( )
+    factor -> . int_lit
+    factor -> . float_lit
+    factor -> . true
+    factor -> . false
+    goto(I189, id) = I58
+    goto(I189, int_lit) = I59
+    goto(I189, float_lit) = I60
+    goto(I189, true) = I61
+    goto(I189, false) = I62
+    goto(I189, -) = I56
+    goto(I189, !) = I51
+    goto(I189, () = I57
+    goto(I189, expr_list) = I193
+    goto(I189, expr) = I87
+    goto(I189, and_expr) = I49
+    goto(I189, not_expr) = I50
+    goto(I189, rel_expr) = I52
+    goto(I189, arith_expr) = I53
+    goto(I189, term) = I54
+    goto(I189, factor) = I55
+
+I190:
+    decl_stmt -> type id [ ] = { expr_list . } ;
+    expr_list -> expr_list . , expr
+    goto(I190, }) = I194
+    goto(I190, ,) = I131
+
+I191:
+    for_stmt -> for ( for_init ; expr ; simple . ) stmt
+    goto(I191, )) = I195
+
+I192:
+    if_stmt -> if ( expr ) stmt else stmt .
+
+I193:
+    decl_stmt -> type id [ int_lit ] = { expr_list . } ;
+    expr_list -> expr_list . , expr
+    goto(I193, }) = I196
+    goto(I193, ,) = I131
+
+I194:
+    decl_stmt -> type id [ ] = { expr_list } . ;
+    goto(I194, ;) = I197
+
+I195:
+    stmt -> . decl_stmt
+    stmt -> . assign_stmt
+    stmt -> . call_stmt
+    stmt -> . return_stmt
+    stmt -> . print_stmt
+    stmt -> . break_stmt
+    stmt -> . continue_stmt
+    stmt -> . for_stmt
+    stmt -> . if_stmt
+    stmt -> . while_stmt
+    stmt -> . block
+    decl_stmt -> . type id = expr ;
+    decl_stmt -> . type id ;
+    decl_stmt -> . type id [ int_lit ] ;
+    decl_stmt -> . type id [ int_lit ] = { expr_list } ;
+    decl_stmt -> . type id [ ] = { expr_list } ;
+    type -> . int
+    type -> . float
+    assign_stmt -> . simple ;
+    simple -> . lvalue = expr
+    simple -> . lvalue += expr
+    simple -> . lvalue -= expr
+    simple -> . lvalue *= expr
+    simple -> . lvalue /= expr
+    simple -> . lvalue %= expr
+    simple -> . lvalue ++
+    simple -> . lvalue --
+    lvalue -> . id
+    lvalue -> . id [ expr ]
+    call_stmt -> . id ( expr_list ) ;
+    call_stmt -> . id ( ) ;
+    return_stmt -> . return expr ;
+    return_stmt -> . return ;
+    print_stmt -> . print ( expr ) ;
+    break_stmt -> . break ;
+    continue_stmt -> . continue ;
+    for_stmt -> . for ( for_init ; expr ; simple ) stmt
+    for_stmt -> for ( for_init ; expr ; simple ) . stmt
+    if_stmt -> . if ( expr ) stmt
+    if_stmt -> . if ( expr ) stmt else stmt
+    while_stmt -> . while ( expr ) stmt
+    block -> . { stmt_list }
+    block -> . { }
+    goto(I195, id) = I24
+    goto(I195, int) = I20
+    goto(I195, float) = I21
+    goto(I195, if) = I30
+    goto(I195, while) = I31
+    goto(I195, return) = I25
+    goto(I195, for) = I29
+    goto(I195, print) = I26
+    goto(I195, break) = I27
+    goto(I195, continue) = I28
+    goto(I195, {) = I32
+    goto(I195, stmt) = I198
+    goto(I195, decl_stmt) = I9
+    goto(I195, type) = I71
+    goto(I195, assign_stmt) = I10
+    goto(I195, simple) = I22
+    goto(I195, lvalue) = I23
+    goto(I195, call_stmt) = I11
+    goto(I195, return_stmt) = I12
+    goto(I195, print_stmt) = I13
+    goto(I195, break_stmt) = I14
+    goto(I195, continue_stmt) = I15
+    goto(I195, for_stmt) = I16
+    goto(I195, if_stmt) = I17
+    goto(I195, while_stmt) = I18
+    goto(I195, block) = I19
+
+I196:
+    decl_stmt -> type id [ int_lit ] = { expr_list } . ;
+    goto(I196, ;) = I199
+
+I197:
+    decl_stmt -> type id [ ] = { expr_list } ; .
+
+I198:
+    for_stmt -> for ( for_init ; expr ; simple ) stmt .
+
+I199:
+    decl_stmt -> type id [ int_lit ] = { expr_list } ; .
 
 SLR PARSING TABLE (non-error entries only; sN = shift to N, rN = reduce by production N)
-    0 | ACTION:  id=s12  int=s10  float=s11  if=s13  while=s14  {=s15  | GOTO:  program=1  stmt_list=2  stmt=3  decl_stmt=4  type=9  assign_stmt=5  if_stmt=6  while_stmt=7  block=8
+    0 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  void=s8  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  | GOTO:  program=1  item_list=2  item=3  func_def=5  func_proto=6  stmt=4  decl_stmt=9  type=7  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
     1 | ACTION:  $=acc
-    2 | ACTION:  id=s12  int=s10  float=s11  if=s13  while=s14  {=s15  $=r1  | GOTO:  stmt=16  decl_stmt=4  type=9  assign_stmt=5  if_stmt=6  while_stmt=7  block=8
-    3 | ACTION:  id=r3  int=r3  float=r3  if=r3  while=r3  {=r3  }=r3  $=r3
-    4 | ACTION:  id=r4  int=r4  float=r4  if=r4  while=r4  {=r4  }=r4  $=r4
-    5 | ACTION:  id=r5  int=r5  float=r5  if=r5  while=r5  {=r5  }=r5  $=r5
-    6 | ACTION:  id=r6  int=r6  float=r6  if=r6  while=r6  {=r6  }=r6  $=r6
-    7 | ACTION:  id=r7  int=r7  float=r7  if=r7  while=r7  {=r7  }=r7  $=r7
-    8 | ACTION:  id=r8  int=r8  float=r8  if=r8  while=r8  {=r8  }=r8  $=r8
-    9 | ACTION:  id=s17
-   10 | ACTION:  id=r11
-   11 | ACTION:  id=r12
-   12 | ACTION:  ==s18
-   13 | ACTION:  (=s19
-   14 | ACTION:  (=s20
-   15 | ACTION:  id=s12  int=s10  float=s11  if=s13  while=s14  {=s15  }=s22  | GOTO:  stmt_list=21  stmt=3  decl_stmt=4  type=9  assign_stmt=5  if_stmt=6  while_stmt=7  block=8
-   16 | ACTION:  id=r2  int=r2  float=r2  if=r2  while=r2  {=r2  }=r2  $=r2
-   17 | ACTION:  ==s23  ;=s24
-   18 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  expr=25  and_expr=26  not_expr=27  rel_expr=29  arith_expr=30  term=31  factor=32
-   19 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  expr=40  and_expr=26  not_expr=27  rel_expr=29  arith_expr=30  term=31  factor=32
-   20 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  expr=41  and_expr=26  not_expr=27  rel_expr=29  arith_expr=30  term=31  factor=32
-   21 | ACTION:  id=s12  int=s10  float=s11  if=s13  while=s14  {=s15  }=s42  | GOTO:  stmt=16  decl_stmt=4  type=9  assign_stmt=5  if_stmt=6  while_stmt=7  block=8
-   22 | ACTION:  id=r18  int=r18  float=r18  if=r18  else=r18  while=r18  {=r18  }=r18  $=r18
-   23 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  expr=43  and_expr=26  not_expr=27  rel_expr=29  arith_expr=30  term=31  factor=32
-   24 | ACTION:  id=r10  int=r10  float=r10  if=r10  while=r10  {=r10  }=r10  $=r10
-   25 | ACTION:  ||=s45  ;=s44
-   26 | ACTION:  &&=s46  ||=r20  )=r20  ;=r20
-   27 | ACTION:  &&=r22  ||=r22  )=r22  ;=r22
-   28 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  not_expr=47  rel_expr=29  arith_expr=30  term=31  factor=32
-   29 | ACTION:  &&=r24  ||=r24  )=r24  ;=r24
-   30 | ACTION:  +=s55  -=s56  <=s49  <==s50  >=s51  >==s52  ===s53  !==s54  &&=r26  ||=r26  )=r26  ;=r26  | GOTO:  relop=48
-   31 | ACTION:  +=r35  -=r35  *=s57  /=s58  %=s59  <=r35  <==r35  >=r35  >==r35  ===r35  !==r35  &&=r35  ||=r35  )=r35  ;=r35
-   32 | ACTION:  +=r39  -=r39  *=r39  /=r39  %=r39  <=r39  <==r39  >=r39  >==r39  ===r39  !==r39  &&=r39  ||=r39  )=r39  ;=r39
-   33 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  (=s34  | GOTO:  factor=60
-   34 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  expr=61  and_expr=26  not_expr=27  rel_expr=29  arith_expr=30  term=31  factor=32
-   35 | ACTION:  +=r42  -=r42  *=r42  /=r42  %=r42  <=r42  <==r42  >=r42  >==r42  ===r42  !==r42  &&=r42  ||=r42  )=r42  ;=r42
-   36 | ACTION:  +=r43  -=r43  *=r43  /=r43  %=r43  <=r43  <==r43  >=r43  >==r43  ===r43  !==r43  &&=r43  ||=r43  )=r43  ;=r43
-   37 | ACTION:  +=r44  -=r44  *=r44  /=r44  %=r44  <=r44  <==r44  >=r44  >==r44  ===r44  !==r44  &&=r44  ||=r44  )=r44  ;=r44
-   38 | ACTION:  +=r45  -=r45  *=r45  /=r45  %=r45  <=r45  <==r45  >=r45  >==r45  ===r45  !==r45  &&=r45  ||=r45  )=r45  ;=r45
-   39 | ACTION:  +=r46  -=r46  *=r46  /=r46  %=r46  <=r46  <==r46  >=r46  >==r46  ===r46  !==r46  &&=r46  ||=r46  )=r46  ;=r46
-   40 | ACTION:  ||=s45  )=s62
-   41 | ACTION:  ||=s45  )=s63
-   42 | ACTION:  id=r17  int=r17  float=r17  if=r17  else=r17  while=r17  {=r17  }=r17  $=r17
-   43 | ACTION:  ||=s45  ;=s64
-   44 | ACTION:  id=r13  int=r13  float=r13  if=r13  while=r13  {=r13  }=r13  $=r13
-   45 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  and_expr=65  not_expr=27  rel_expr=29  arith_expr=30  term=31  factor=32
-   46 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  !=s28  (=s34  | GOTO:  not_expr=66  rel_expr=29  arith_expr=30  term=31  factor=32
-   47 | ACTION:  &&=r23  ||=r23  )=r23  ;=r23
-   48 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  (=s34  | GOTO:  arith_expr=67  term=31  factor=32
-   49 | ACTION:  id=r27  int_lit=r27  float_lit=r27  true=r27  false=r27  -=r27  (=r27
-   50 | ACTION:  id=r28  int_lit=r28  float_lit=r28  true=r28  false=r28  -=r28  (=r28
-   51 | ACTION:  id=r29  int_lit=r29  float_lit=r29  true=r29  false=r29  -=r29  (=r29
-   52 | ACTION:  id=r30  int_lit=r30  float_lit=r30  true=r30  false=r30  -=r30  (=r30
-   53 | ACTION:  id=r31  int_lit=r31  float_lit=r31  true=r31  false=r31  -=r31  (=r31
-   54 | ACTION:  id=r32  int_lit=r32  float_lit=r32  true=r32  false=r32  -=r32  (=r32
-   55 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  (=s34  | GOTO:  term=68  factor=32
-   56 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  (=s34  | GOTO:  term=69  factor=32
-   57 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  (=s34  | GOTO:  factor=70
-   58 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  (=s34  | GOTO:  factor=71
-   59 | ACTION:  id=s35  int_lit=s36  float_lit=s37  true=s38  false=s39  -=s33  (=s34  | GOTO:  factor=72
-   60 | ACTION:  +=r40  -=r40  *=r40  /=r40  %=r40  <=r40  <==r40  >=r40  >==r40  ===r40  !==r40  &&=r40  ||=r40  )=r40  ;=r40
-   61 | ACTION:  ||=s45  )=s73
-   62 | ACTION:  {=s15  | GOTO:  block=74
-   63 | ACTION:  {=s15  | GOTO:  block=75
-   64 | ACTION:  id=r9  int=r9  float=r9  if=r9  while=r9  {=r9  }=r9  $=r9
-   65 | ACTION:  &&=s46  ||=r19  )=r19  ;=r19
-   66 | ACTION:  &&=r21  ||=r21  )=r21  ;=r21
-   67 | ACTION:  +=s55  -=s56  &&=r25  ||=r25  )=r25  ;=r25
-   68 | ACTION:  +=r33  -=r33  *=s57  /=s58  %=s59  <=r33  <==r33  >=r33  >==r33  ===r33  !==r33  &&=r33  ||=r33  )=r33  ;=r33
-   69 | ACTION:  +=r34  -=r34  *=s57  /=s58  %=s59  <=r34  <==r34  >=r34  >==r34  ===r34  !==r34  &&=r34  ||=r34  )=r34  ;=r34
-   70 | ACTION:  +=r36  -=r36  *=r36  /=r36  %=r36  <=r36  <==r36  >=r36  >==r36  ===r36  !==r36  &&=r36  ||=r36  )=r36  ;=r36
-   71 | ACTION:  +=r37  -=r37  *=r37  /=r37  %=r37  <=r37  <==r37  >=r37  >==r37  ===r37  !==r37  &&=r37  ||=r37  )=r37  ;=r37
-   72 | ACTION:  +=r38  -=r38  *=r38  /=r38  %=r38  <=r38  <==r38  >=r38  >==r38  ===r38  !==r38  &&=r38  ||=r38  )=r38  ;=r38
-   73 | ACTION:  +=r41  -=r41  *=r41  /=r41  %=r41  <=r41  <==r41  >=r41  >==r41  ===r41  !==r41  &&=r41  ||=r41  )=r41  ;=r41
-   74 | ACTION:  id=r14  int=r14  float=r14  if=r14  else=s76  while=r14  {=r14  }=r14  $=r14
-   75 | ACTION:  id=r16  int=r16  float=r16  if=r16  while=r16  {=r16  }=r16  $=r16
-   76 | ACTION:  {=s15  | GOTO:  block=77
-   77 | ACTION:  id=r15  int=r15  float=r15  if=r15  while=r15  {=r15  }=r15  $=r15
+    2 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  void=s8  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  $=r1  | GOTO:  item=33  func_def=5  func_proto=6  stmt=4  decl_stmt=9  type=7  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
+    3 | ACTION:  id=r3  int=r3  float=r3  if=r3  while=r3  void=r3  return=r3  for=r3  print=r3  break=r3  continue=r3  {=r3  $=r3
+    4 | ACTION:  id=r4  int=r4  float=r4  if=r4  while=r4  void=r4  return=r4  for=r4  print=r4  break=r4  continue=r4  {=r4  $=r4
+    5 | ACTION:  id=r5  int=r5  float=r5  if=r5  while=r5  void=r5  return=r5  for=r5  print=r5  break=r5  continue=r5  {=r5  $=r5
+    6 | ACTION:  id=r6  int=r6  float=r6  if=r6  while=r6  void=r6  return=r6  for=r6  print=r6  break=r6  continue=r6  {=r6  $=r6
+    7 | ACTION:  id=s34
+    8 | ACTION:  id=s35
+    9 | ACTION:  id=r25  int=r25  float=r25  if=r25  else=r25  while=r25  void=r25  return=r25  for=r25  print=r25  break=r25  continue=r25  {=r25  }=r25  $=r25
+   10 | ACTION:  id=r26  int=r26  float=r26  if=r26  else=r26  while=r26  void=r26  return=r26  for=r26  print=r26  break=r26  continue=r26  {=r26  }=r26  $=r26
+   11 | ACTION:  id=r27  int=r27  float=r27  if=r27  else=r27  while=r27  void=r27  return=r27  for=r27  print=r27  break=r27  continue=r27  {=r27  }=r27  $=r27
+   12 | ACTION:  id=r28  int=r28  float=r28  if=r28  else=r28  while=r28  void=r28  return=r28  for=r28  print=r28  break=r28  continue=r28  {=r28  }=r28  $=r28
+   13 | ACTION:  id=r29  int=r29  float=r29  if=r29  else=r29  while=r29  void=r29  return=r29  for=r29  print=r29  break=r29  continue=r29  {=r29  }=r29  $=r29
+   14 | ACTION:  id=r30  int=r30  float=r30  if=r30  else=r30  while=r30  void=r30  return=r30  for=r30  print=r30  break=r30  continue=r30  {=r30  }=r30  $=r30
+   15 | ACTION:  id=r31  int=r31  float=r31  if=r31  else=r31  while=r31  void=r31  return=r31  for=r31  print=r31  break=r31  continue=r31  {=r31  }=r31  $=r31
+   16 | ACTION:  id=r32  int=r32  float=r32  if=r32  else=r32  while=r32  void=r32  return=r32  for=r32  print=r32  break=r32  continue=r32  {=r32  }=r32  $=r32
+   17 | ACTION:  id=r33  int=r33  float=r33  if=r33  else=r33  while=r33  void=r33  return=r33  for=r33  print=r33  break=r33  continue=r33  {=r33  }=r33  $=r33
+   18 | ACTION:  id=r34  int=r34  float=r34  if=r34  else=r34  while=r34  void=r34  return=r34  for=r34  print=r34  break=r34  continue=r34  {=r34  }=r34  $=r34
+   19 | ACTION:  id=r35  int=r35  float=r35  if=r35  else=r35  while=r35  void=r35  return=r35  for=r35  print=r35  break=r35  continue=r35  {=r35  }=r35  $=r35
+   20 | ACTION:  id=r41
+   21 | ACTION:  id=r42
+   22 | ACTION:  ;=s36
+   23 | ACTION:  ==s37  +==s38  -==s39  *==s40  /==s41  %==s42  ++=s43  --=s44
+   24 | ACTION:  ==r52  +==r52  -==r52  *==r52  /==r52  %==r52  ++=r52  --=r52  (=s46  [=s45
+   25 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  ;=s48  | GOTO:  expr=47  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   26 | ACTION:  (=s63
+   27 | ACTION:  ;=s64
+   28 | ACTION:  ;=s65
+   29 | ACTION:  (=s66
+   30 | ACTION:  (=s67
+   31 | ACTION:  (=s68
+   32 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  }=s72  | GOTO:  stmt_list=69  stmt=70  decl_stmt=9  type=71  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
+   33 | ACTION:  id=r2  int=r2  float=r2  if=r2  while=r2  void=r2  return=r2  for=r2  print=r2  break=r2  continue=r2  {=r2  $=r2
+   34 | ACTION:  ==s74  (=s73  [=s76  ;=s75
+   35 | ACTION:  (=s77
+   36 | ACTION:  id=r43  int=r43  float=r43  if=r43  else=r43  while=r43  void=r43  return=r43  for=r43  print=r43  break=r43  continue=r43  {=r43  }=r43  $=r43
+   37 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=78  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   38 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=79  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   39 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=80  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   40 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=81  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   41 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=82  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   42 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=83  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   43 | ACTION:  )=r50  ;=r50
+   44 | ACTION:  )=r51  ;=r51
+   45 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=84  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   46 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  )=s86  | GOTO:  expr_list=85  expr=87  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   47 | ACTION:  ||=s89  ;=s88
+   48 | ACTION:  id=r59  int=r59  float=r59  if=r59  else=r59  while=r59  void=r59  return=r59  for=r59  print=r59  break=r59  continue=r59  {=r59  }=r59  $=r59
+   49 | ACTION:  &&=s90  ||=r72  )=r72  }=r72  ]=r72  ;=r72  ,=r72
+   50 | ACTION:  &&=r74  ||=r74  )=r74  }=r74  ]=r74  ;=r74  ,=r74
+   51 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  not_expr=91  rel_expr=52  arith_expr=53  term=54  factor=55
+   52 | ACTION:  &&=r76  ||=r76  )=r76  }=r76  ]=r76  ;=r76  ,=r76
+   53 | ACTION:  +=s99  -=s100  <=s93  <==s94  >=s95  >==s96  ===s97  !==s98  &&=r78  ||=r78  )=r78  }=r78  ]=r78  ;=r78  ,=r78  | GOTO:  relop=92
+   54 | ACTION:  +=r87  -=r87  *=s101  /=s102  %=s103  <=r87  <==r87  >=r87  >==r87  ===r87  !==r87  &&=r87  ||=r87  )=r87  }=r87  ]=r87  ;=r87  ,=r87
+   55 | ACTION:  +=r91  -=r91  *=r91  /=r91  %=r91  <=r91  <==r91  >=r91  >==r91  ===r91  !==r91  &&=r91  ||=r91  )=r91  }=r91  ]=r91  ;=r91  ,=r91
+   56 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  (=s57  | GOTO:  factor=104
+   57 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=105  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   58 | ACTION:  +=r94  -=r94  *=r94  /=r94  %=r94  <=r94  <==r94  >=r94  >==r94  ===r94  !==r94  &&=r94  ||=r94  (=s107  )=r94  }=r94  [=s106  ]=r94  ;=r94  ,=r94
+   59 | ACTION:  +=r98  -=r98  *=r98  /=r98  %=r98  <=r98  <==r98  >=r98  >==r98  ===r98  !==r98  &&=r98  ||=r98  )=r98  }=r98  ]=r98  ;=r98  ,=r98
+   60 | ACTION:  +=r99  -=r99  *=r99  /=r99  %=r99  <=r99  <==r99  >=r99  >==r99  ===r99  !==r99  &&=r99  ||=r99  )=r99  }=r99  ]=r99  ;=r99  ,=r99
+   61 | ACTION:  +=r100  -=r100  *=r100  /=r100  %=r100  <=r100  <==r100  >=r100  >==r100  ===r100  !==r100  &&=r100  ||=r100  )=r100  }=r100  ]=r100  ;=r100  ,=r100
+   62 | ACTION:  +=r101  -=r101  *=r101  /=r101  %=r101  <=r101  <==r101  >=r101  >==r101  ===r101  !==r101  &&=r101  ||=r101  )=r101  }=r101  ]=r101  ;=r101  ,=r101
+   63 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=108  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   64 | ACTION:  id=r61  int=r61  float=r61  if=r61  else=r61  while=r61  void=r61  return=r61  for=r61  print=r61  break=r61  continue=r61  {=r61  }=r61  $=r61
+   65 | ACTION:  id=r62  int=r62  float=r62  if=r62  else=r62  while=r62  void=r62  return=r62  for=r62  print=r62  break=r62  continue=r62  {=r62  }=r62  $=r62
+   66 | ACTION:  id=s109  int=s20  float=s21  | GOTO:  type=112  simple=111  lvalue=23  for_init=110
+   67 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=113  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   68 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=114  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   69 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  }=s116  | GOTO:  stmt=115  decl_stmt=9  type=71  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
+   70 | ACTION:  id=r24  int=r24  float=r24  if=r24  while=r24  return=r24  for=r24  print=r24  break=r24  continue=r24  {=r24  }=r24
+   71 | ACTION:  id=s117
+   72 | ACTION:  id=r70  int=r70  float=r70  if=r70  else=r70  while=r70  void=r70  return=r70  for=r70  print=r70  break=r70  continue=r70  {=r70  }=r70  $=r70
+   73 | ACTION:  int=s20  float=s21  void=s120  )=s119  | GOTO:  params=118  param=121  type=122
+   74 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=123  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   75 | ACTION:  id=r37  int=r37  float=r37  if=r37  else=r37  while=r37  void=r37  return=r37  for=r37  print=r37  break=r37  continue=r37  {=r37  }=r37  $=r37
+   76 | ACTION:  int_lit=s124  ]=s125
+   77 | ACTION:  int=s20  float=s21  void=s128  )=s127  | GOTO:  params=126  param=121  type=122
+   78 | ACTION:  ||=s89  )=r44  ;=r44
+   79 | ACTION:  ||=s89  )=r45  ;=r45
+   80 | ACTION:  ||=s89  )=r46  ;=r46
+   81 | ACTION:  ||=s89  )=r47  ;=r47
+   82 | ACTION:  ||=s89  )=r48  ;=r48
+   83 | ACTION:  ||=s89  )=r49  ;=r49
+   84 | ACTION:  ||=s89  ]=s129
+   85 | ACTION:  )=s130  ,=s131
+   86 | ACTION:  ;=s132
+   87 | ACTION:  ||=s89  )=r57  }=r57  ,=r57
+   88 | ACTION:  id=r58  int=r58  float=r58  if=r58  else=r58  while=r58  void=r58  return=r58  for=r58  print=r58  break=r58  continue=r58  {=r58  }=r58  $=r58
+   89 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  and_expr=133  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+   90 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  not_expr=134  rel_expr=52  arith_expr=53  term=54  factor=55
+   91 | ACTION:  &&=r75  ||=r75  )=r75  }=r75  ]=r75  ;=r75  ,=r75
+   92 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  (=s57  | GOTO:  arith_expr=135  term=54  factor=55
+   93 | ACTION:  id=r79  int_lit=r79  float_lit=r79  true=r79  false=r79  -=r79  (=r79
+   94 | ACTION:  id=r80  int_lit=r80  float_lit=r80  true=r80  false=r80  -=r80  (=r80
+   95 | ACTION:  id=r81  int_lit=r81  float_lit=r81  true=r81  false=r81  -=r81  (=r81
+   96 | ACTION:  id=r82  int_lit=r82  float_lit=r82  true=r82  false=r82  -=r82  (=r82
+   97 | ACTION:  id=r83  int_lit=r83  float_lit=r83  true=r83  false=r83  -=r83  (=r83
+   98 | ACTION:  id=r84  int_lit=r84  float_lit=r84  true=r84  false=r84  -=r84  (=r84
+   99 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  (=s57  | GOTO:  term=136  factor=55
+  100 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  (=s57  | GOTO:  term=137  factor=55
+  101 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  (=s57  | GOTO:  factor=138
+  102 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  (=s57  | GOTO:  factor=139
+  103 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  (=s57  | GOTO:  factor=140
+  104 | ACTION:  +=r92  -=r92  *=r92  /=r92  %=r92  <=r92  <==r92  >=r92  >==r92  ===r92  !==r92  &&=r92  ||=r92  )=r92  }=r92  ]=r92  ;=r92  ,=r92
+  105 | ACTION:  ||=s89  )=s141
+  106 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=142  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+  107 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  )=s144  | GOTO:  expr_list=143  expr=87  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+  108 | ACTION:  ||=s89  )=s145
+  109 | ACTION:  ==r52  +==r52  -==r52  *==r52  /==r52  %==r52  ++=r52  --=r52  [=s45
+  110 | ACTION:  ;=s146
+  111 | ACTION:  ;=r64
+  112 | ACTION:  id=s147
+  113 | ACTION:  ||=s89  )=s148
+  114 | ACTION:  ||=s89  )=s149
+  115 | ACTION:  id=r23  int=r23  float=r23  if=r23  while=r23  return=r23  for=r23  print=r23  break=r23  continue=r23  {=r23  }=r23
+  116 | ACTION:  id=r69  int=r69  float=r69  if=r69  else=r69  while=r69  void=r69  return=r69  for=r69  print=r69  break=r69  continue=r69  {=r69  }=r69  $=r69
+  117 | ACTION:  ==s74  [=s76  ;=s75
+  118 | ACTION:  )=s150  ,=s151
+  119 | ACTION:  {=s32  ;=s153  | GOTO:  block=152
+  120 | ACTION:  )=s154
+  121 | ACTION:  )=r20  ,=r20
+  122 | ACTION:  id=s155
+  123 | ACTION:  ||=s89  ;=s156
+  124 | ACTION:  ]=s157
+  125 | ACTION:  ==s158
+  126 | ACTION:  )=s159  ,=s151
+  127 | ACTION:  {=s32  ;=s161  | GOTO:  block=160
+  128 | ACTION:  )=s162
+  129 | ACTION:  ==r53  +==r53  -==r53  *==r53  /==r53  %==r53  ++=r53  --=r53
+  130 | ACTION:  ;=s163
+  131 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=164  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+  132 | ACTION:  id=r55  int=r55  float=r55  if=r55  else=r55  while=r55  void=r55  return=r55  for=r55  print=r55  break=r55  continue=r55  {=r55  }=r55  $=r55
+  133 | ACTION:  &&=s90  ||=r71  )=r71  }=r71  ]=r71  ;=r71  ,=r71
+  134 | ACTION:  &&=r73  ||=r73  )=r73  }=r73  ]=r73  ;=r73  ,=r73
+  135 | ACTION:  +=s99  -=s100  &&=r77  ||=r77  )=r77  }=r77  ]=r77  ;=r77  ,=r77
+  136 | ACTION:  +=r85  -=r85  *=s101  /=s102  %=s103  <=r85  <==r85  >=r85  >==r85  ===r85  !==r85  &&=r85  ||=r85  )=r85  }=r85  ]=r85  ;=r85  ,=r85
+  137 | ACTION:  +=r86  -=r86  *=s101  /=s102  %=s103  <=r86  <==r86  >=r86  >==r86  ===r86  !==r86  &&=r86  ||=r86  )=r86  }=r86  ]=r86  ;=r86  ,=r86
+  138 | ACTION:  +=r88  -=r88  *=r88  /=r88  %=r88  <=r88  <==r88  >=r88  >==r88  ===r88  !==r88  &&=r88  ||=r88  )=r88  }=r88  ]=r88  ;=r88  ,=r88
+  139 | ACTION:  +=r89  -=r89  *=r89  /=r89  %=r89  <=r89  <==r89  >=r89  >==r89  ===r89  !==r89  &&=r89  ||=r89  )=r89  }=r89  ]=r89  ;=r89  ,=r89
+  140 | ACTION:  +=r90  -=r90  *=r90  /=r90  %=r90  <=r90  <==r90  >=r90  >==r90  ===r90  !==r90  &&=r90  ||=r90  )=r90  }=r90  ]=r90  ;=r90  ,=r90
+  141 | ACTION:  +=r93  -=r93  *=r93  /=r93  %=r93  <=r93  <==r93  >=r93  >==r93  ===r93  !==r93  &&=r93  ||=r93  )=r93  }=r93  ]=r93  ;=r93  ,=r93
+  142 | ACTION:  ||=s89  ]=s165
+  143 | ACTION:  )=s166  ,=s131
+  144 | ACTION:  +=r97  -=r97  *=r97  /=r97  %=r97  <=r97  <==r97  >=r97  >==r97  ===r97  !==r97  &&=r97  ||=r97  )=r97  }=r97  ]=r97  ;=r97  ,=r97
+  145 | ACTION:  ;=s167
+  146 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=168  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+  147 | ACTION:  ==s169
+  148 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  | GOTO:  stmt=170  decl_stmt=9  type=71  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
+  149 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  | GOTO:  stmt=171  decl_stmt=9  type=71  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
+  150 | ACTION:  {=s32  ;=s173  | GOTO:  block=172
+  151 | ACTION:  int=s20  float=s21  | GOTO:  param=174  type=122
+  152 | ACTION:  id=r8  int=r8  float=r8  if=r8  while=r8  void=r8  return=r8  for=r8  print=r8  break=r8  continue=r8  {=r8  $=r8
+  153 | ACTION:  id=r16  int=r16  float=r16  if=r16  while=r16  void=r16  return=r16  for=r16  print=r16  break=r16  continue=r16  {=r16  $=r16
+  154 | ACTION:  {=s32  ;=s176  | GOTO:  block=175
+  155 | ACTION:  )=r21  [=s177  ,=r21
+  156 | ACTION:  id=r36  int=r36  float=r36  if=r36  else=r36  while=r36  void=r36  return=r36  for=r36  print=r36  break=r36  continue=r36  {=r36  }=r36  $=r36
+  157 | ACTION:  ==s179  ;=s178
+  158 | ACTION:  {=s180
+  159 | ACTION:  {=s32  ;=s182  | GOTO:  block=181
+  160 | ACTION:  id=r10  int=r10  float=r10  if=r10  while=r10  void=r10  return=r10  for=r10  print=r10  break=r10  continue=r10  {=r10  $=r10
+  161 | ACTION:  id=r18  int=r18  float=r18  if=r18  while=r18  void=r18  return=r18  for=r18  print=r18  break=r18  continue=r18  {=r18  $=r18
+  162 | ACTION:  {=s32  ;=s184  | GOTO:  block=183
+  163 | ACTION:  id=r54  int=r54  float=r54  if=r54  else=r54  while=r54  void=r54  return=r54  for=r54  print=r54  break=r54  continue=r54  {=r54  }=r54  $=r54
+  164 | ACTION:  ||=s89  )=r56  }=r56  ,=r56
+  165 | ACTION:  +=r95  -=r95  *=r95  /=r95  %=r95  <=r95  <==r95  >=r95  >==r95  ===r95  !==r95  &&=r95  ||=r95  )=r95  }=r95  ]=r95  ;=r95  ,=r95
+  166 | ACTION:  +=r96  -=r96  *=r96  /=r96  %=r96  <=r96  <==r96  >=r96  >==r96  ===r96  !==r96  &&=r96  ||=r96  )=r96  }=r96  ]=r96  ;=r96  ,=r96
+  167 | ACTION:  id=r60  int=r60  float=r60  if=r60  else=r60  while=r60  void=r60  return=r60  for=r60  print=r60  break=r60  continue=r60  {=r60  }=r60  $=r60
+  168 | ACTION:  ||=s89  ;=s185
+  169 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr=186  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+  170 | ACTION:  id=r66  int=r66  float=r66  if=r66  else=s187  while=r66  void=r66  return=r66  for=r66  print=r66  break=r66  continue=r66  {=r66  }=r66  $=r66
+  171 | ACTION:  id=r68  int=r68  float=r68  if=r68  else=r68  while=r68  void=r68  return=r68  for=r68  print=r68  break=r68  continue=r68  {=r68  }=r68  $=r68
+  172 | ACTION:  id=r7  int=r7  float=r7  if=r7  while=r7  void=r7  return=r7  for=r7  print=r7  break=r7  continue=r7  {=r7  $=r7
+  173 | ACTION:  id=r15  int=r15  float=r15  if=r15  while=r15  void=r15  return=r15  for=r15  print=r15  break=r15  continue=r15  {=r15  $=r15
+  174 | ACTION:  )=r19  ,=r19
+  175 | ACTION:  id=r11  int=r11  float=r11  if=r11  while=r11  void=r11  return=r11  for=r11  print=r11  break=r11  continue=r11  {=r11  $=r11
+  176 | ACTION:  id=r13  int=r13  float=r13  if=r13  while=r13  void=r13  return=r13  for=r13  print=r13  break=r13  continue=r13  {=r13  $=r13
+  177 | ACTION:  ]=s188
+  178 | ACTION:  id=r38  int=r38  float=r38  if=r38  else=r38  while=r38  void=r38  return=r38  for=r38  print=r38  break=r38  continue=r38  {=r38  }=r38  $=r38
+  179 | ACTION:  {=s189
+  180 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr_list=190  expr=87  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+  181 | ACTION:  id=r9  int=r9  float=r9  if=r9  while=r9  void=r9  return=r9  for=r9  print=r9  break=r9  continue=r9  {=r9  $=r9
+  182 | ACTION:  id=r17  int=r17  float=r17  if=r17  while=r17  void=r17  return=r17  for=r17  print=r17  break=r17  continue=r17  {=r17  $=r17
+  183 | ACTION:  id=r12  int=r12  float=r12  if=r12  while=r12  void=r12  return=r12  for=r12  print=r12  break=r12  continue=r12  {=r12  $=r12
+  184 | ACTION:  id=r14  int=r14  float=r14  if=r14  while=r14  void=r14  return=r14  for=r14  print=r14  break=r14  continue=r14  {=r14  $=r14
+  185 | ACTION:  id=s109  | GOTO:  simple=191  lvalue=23
+  186 | ACTION:  ||=s89  ;=r65
+  187 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  | GOTO:  stmt=192  decl_stmt=9  type=71  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
+  188 | ACTION:  )=r22  ,=r22
+  189 | ACTION:  id=s58  int_lit=s59  float_lit=s60  true=s61  false=s62  -=s56  !=s51  (=s57  | GOTO:  expr_list=193  expr=87  and_expr=49  not_expr=50  rel_expr=52  arith_expr=53  term=54  factor=55
+  190 | ACTION:  }=s194  ,=s131
+  191 | ACTION:  )=s195
+  192 | ACTION:  id=r67  int=r67  float=r67  if=r67  else=r67  while=r67  void=r67  return=r67  for=r67  print=r67  break=r67  continue=r67  {=r67  }=r67  $=r67
+  193 | ACTION:  }=s196  ,=s131
+  194 | ACTION:  ;=s197
+  195 | ACTION:  id=s24  int=s20  float=s21  if=s30  while=s31  return=s25  for=s29  print=s26  break=s27  continue=s28  {=s32  | GOTO:  stmt=198  decl_stmt=9  type=71  assign_stmt=10  simple=22  lvalue=23  call_stmt=11  return_stmt=12  print_stmt=13  break_stmt=14  continue_stmt=15  for_stmt=16  if_stmt=17  while_stmt=18  block=19
+  196 | ACTION:  ;=s199
+  197 | ACTION:  id=r40  int=r40  float=r40  if=r40  else=r40  while=r40  void=r40  return=r40  for=r40  print=r40  break=r40  continue=r40  {=r40  }=r40  $=r40
+  198 | ACTION:  id=r63  int=r63  float=r63  if=r63  else=r63  while=r63  void=r63  return=r63  for=r63  print=r63  break=r63  continue=r63  {=r63  }=r63  $=r63
+  199 | ACTION:  id=r39  int=r39  float=r39  if=r39  else=r39  while=r39  void=r39  return=r39  for=r39  print=r39  break=r39  continue=r39  {=r39  }=r39  $=r39
 
 0 conflict(s) — the grammar is SLR(1).
+1 conflict(s) resolved on purpose:
+  shift/reduce conflict in state 170 on 'else': s187 vs r66  -> resolved as shift (dangling else)

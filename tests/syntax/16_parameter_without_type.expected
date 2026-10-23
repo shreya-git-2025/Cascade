@@ -1,0 +1,2 @@
+  line 1, col 9: syntax error: unexpected identifier 'a', expected 'int', 'float', 'void' or ')'
+[exit 1]

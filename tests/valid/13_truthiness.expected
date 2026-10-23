@@ -1,0 +1,5 @@
+
+=== PROGRAM STATE (after 76 VM steps) ===
+  x         int    = 0
+  steps     int    = 30
+[exit 0]

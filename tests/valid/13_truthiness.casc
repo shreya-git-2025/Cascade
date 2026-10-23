@@ -1,0 +1,5 @@
+// C-style truthiness: a number used as a condition is true when it is not 0
+int x = 3;
+int steps = 0;
+while (x) { x = x - 1; steps = steps + 1; }
+if (!x && steps) { steps = steps * 10; }

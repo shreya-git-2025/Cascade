@@ -1,0 +1,9 @@
+int twice(int x) { return x * 2; }
+void fill(int a[], int n) { }
+int v[3];
+float f = 1.5;
+int r = twice(f);
+fill(5, 3);
+fill(f, 3);
+int s = 4;
+fill(s, 3);

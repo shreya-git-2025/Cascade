@@ -1,0 +1,2 @@
+  line 2, col 5: syntax error: unexpected '=', expected an operator, ')', '}', ']', ';' or ','
+[exit 1]

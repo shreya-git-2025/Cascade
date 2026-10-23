@@ -1,0 +1,4 @@
+int a() { return 1.5; }
+int b() { return; }
+void c() { return 1; }
+return 5;

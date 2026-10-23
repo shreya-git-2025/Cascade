@@ -41,6 +41,13 @@ std::string annotate(const Node& n) {
 }
 } // namespace
 
+NodePtr cloneNode(const NodePtr& node) {
+    if (!node) return nullptr;
+    auto copy = std::make_shared<Node>(*node);
+    for (NodePtr& kid : copy->kids) kid = cloneNode(kid);
+    return copy;
+}
+
 void printAst(const NodePtr& node, std::ostream& out, int depth) {
     if (!node) return;
     std::string pad(depth * 2, ' ');
@@ -50,11 +57,25 @@ void printAst(const NodePtr& node, std::ostream& out, int depth) {
         case NodeKind::Program:    out << "Program"; break;
         case NodeKind::Block:      out << "Block"; break;
         case NodeKind::StmtList:   out << "StmtList"; break;
-       case NodeKind::Decl:       out << "Decl " << typeName(n.declType) << " " << n.text
-                                       << (n.isArray ? "[" + std::to_string(n.arraySize) + "]" : ""); break;
+        case NodeKind::Decl:
+            out << "Decl " << typeName(n.declType) << " " << n.text;
+            if (n.isArray) out << "[" << n.arraySize << "]";
+            break;
         case NodeKind::Assign:     out << "Assign " << n.text; break;
+        case NodeKind::ArrAssign:  out << "ArrAssign " << n.text; break;
         case NodeKind::If:         out << (n.kids.size() == 3 ? "IfElse" : "If"); break;
-        case NodeKind::While:      out << "While"; break;
+        case NodeKind::While:      out << (n.kids.size() == 3 ? "While (with step)" : "While"); break;
+        case NodeKind::FuncDef:    out << "FuncDef " << typeName(n.declType) << " " << n.text; break;
+        case NodeKind::FuncProto:  out << "FuncProto " << typeName(n.declType) << " " << n.text; break;
+        case NodeKind::Param:
+            out << "Param " << typeName(n.declType) << " " << n.text << (n.isArray ? "[]" : "");
+            break;
+        case NodeKind::Return:     out << "Return"; break;
+        case NodeKind::Print:      out << "Print"; break;
+        case NodeKind::Break:      out << "Break"; break;
+        case NodeKind::Continue:   out << "Continue"; break;
+        case NodeKind::Call:       out << "Call " << n.text; break;
+        case NodeKind::Index:      out << "Index " << n.text; break;
         case NodeKind::IntLit:     out << "Int " << n.text; break;
         case NodeKind::FloatLit:   out << "Float " << n.text; break;
         case NodeKind::BoolLit:    out << "Bool " << n.text; break;
@@ -62,13 +83,7 @@ void printAst(const NodePtr& node, std::ostream& out, int depth) {
         case NodeKind::Unary:      out << "Unary " << opSpelling(n.op); break;
         case NodeKind::Binary:     out << "Binary " << opSpelling(n.op); break;
         case NodeKind::IntToFloat: out << "IntToFloat"; break;
-        case NodeKind::FuncDecl:    out << "Func " << typeName(n.declType) << " " << n.text; break;
-        case NodeKind::Param:       out << "Param " << typeName(n.declType) << " " << n.text << (n.isArray ? "[]" : ""); break;
-        case NodeKind::Call:        out << "Call " << n.text; break;
-        case NodeKind::Index:       out << "Index " << n.text; break;
-        case NodeKind::ArrayAssign: out << "ArrayAssign " << n.text; break;
-        case NodeKind::Return:      out << "Return"; break;
-        case NodeKind::Print:       out << "Print"; break;
+        case NodeKind::BoolToInt:  out << "BoolToInt"; break;
     }
     out << annotate(n) << "   [" << n.line << ":" << n.column << "]\n";
     for (const NodePtr& kid : n.kids) printAst(kid, out, depth + 1);

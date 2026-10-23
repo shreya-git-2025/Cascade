@@ -1,0 +1,8 @@
+int ratio(int a, int b) {
+    return a / b;
+}
+int main() {
+    print(ratio(6, 3));
+    print(ratio(1, 0));
+    return 0;
+}

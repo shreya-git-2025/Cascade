@@ -17,7 +17,10 @@ const std::unordered_map<std::string, TokenType>& keywordTable() {
         {"false", TokenType::KW_FALSE},
         {"void", TokenType::KW_VOID},
         {"return", TokenType::KW_RETURN},
+        {"for", TokenType::KW_FOR},
         {"print", TokenType::KW_PRINT},
+        {"break", TokenType::KW_BREAK},
+        {"continue", TokenType::KW_CONTINUE},
     };
     return table;
 }
@@ -54,6 +57,17 @@ void Lexer::skipWhitespaceAndComments() {
             // but harmless to skip here and makes hand-written test
             // programs easier to annotate.
             while (!isAtEnd() && peek() != '\n') advance();
+        } else if (c == '/' && peek(1) == '*') {
+            // Block comment. An unterminated one is a lexical error, reported
+            // at the line and column where the comment started.
+            int startLine = line_, startCol = col_;
+            advance(); advance(); // consume "/*"
+            bool closed = false;
+            while (!isAtEnd()) {
+                if (peek() == '*' && peek(1) == '/') { advance(); advance(); closed = true; break; }
+                advance();
+            }
+            if (!closed) recordError("unterminated block comment", startLine, startCol);
         } else {
             return;
         }
@@ -142,20 +156,34 @@ Token Lexer::scanOperatorOrPunctuation() {
     // Two-character operators are tried first (longest match): '=' alone is
     // ASSIGN, but '==' is EQ, so we must look ahead before committing.
     switch (c) {
-        case '+': return makeToken(TokenType::PLUS, "+", startLine, startCol);
-        case '-': return makeToken(TokenType::MINUS, "-", startLine, startCol);
-        case '*': return makeToken(TokenType::STAR, "*", startLine, startCol);
-        case '/': return makeToken(TokenType::SLASH, "/", startLine, startCol);
-        case '%': return makeToken(TokenType::PERCENT, "%", startLine, startCol);
+        // '+' may start "+", "++" or "+="; the same shape for '-'. Longest
+        // match: look one character ahead before committing.
+        case '+':
+            if (peek() == '+') { advance(); return makeToken(TokenType::PLUS_PLUS, "++", startLine, startCol); }
+            if (peek() == '=') { advance(); return makeToken(TokenType::PLUS_ASSIGN, "+=", startLine, startCol); }
+            return makeToken(TokenType::PLUS, "+", startLine, startCol);
+        case '-':
+            if (peek() == '-') { advance(); return makeToken(TokenType::MINUS_MINUS, "--", startLine, startCol); }
+            if (peek() == '=') { advance(); return makeToken(TokenType::MINUS_ASSIGN, "-=", startLine, startCol); }
+            return makeToken(TokenType::MINUS, "-", startLine, startCol);
+        case '*':
+            if (peek() == '=') { advance(); return makeToken(TokenType::STAR_ASSIGN, "*=", startLine, startCol); }
+            return makeToken(TokenType::STAR, "*", startLine, startCol);
+        case '/':
+            if (peek() == '=') { advance(); return makeToken(TokenType::SLASH_ASSIGN, "/=", startLine, startCol); }
+            return makeToken(TokenType::SLASH, "/", startLine, startCol);
+        case '%':
+            if (peek() == '=') { advance(); return makeToken(TokenType::PERCENT_ASSIGN, "%=", startLine, startCol); }
+            return makeToken(TokenType::PERCENT, "%", startLine, startCol);
 
         case '(': return makeToken(TokenType::LPAREN, "(", startLine, startCol);
         case ')': return makeToken(TokenType::RPAREN, ")", startLine, startCol);
         case '{': return makeToken(TokenType::LBRACE, "{", startLine, startCol);
         case '}': return makeToken(TokenType::RBRACE, "}", startLine, startCol);
-        case ';': return makeToken(TokenType::SEMICOLON, ";", startLine, startCol);
-        case ',': return makeToken(TokenType::COMMA, ",", startLine, startCol);
         case '[': return makeToken(TokenType::LBRACKET, "[", startLine, startCol);
         case ']': return makeToken(TokenType::RBRACKET, "]", startLine, startCol);
+        case ';': return makeToken(TokenType::SEMICOLON, ";", startLine, startCol);
+        case ',': return makeToken(TokenType::COMMA, ",", startLine, startCol);
 
         case '<':
             if (peek() == '=') { advance(); return makeToken(TokenType::LE, "<=", startLine, startCol); }

@@ -2,6 +2,6 @@
   line 3, col 1: semantic error: redeclaration of 'a' (first declared at line 2)
   line 4, col 1: semantic error: assignment to undeclared variable 'b'
   line 5, col 1: semantic error: type mismatch: cannot assign float to int variable 'c' (implicit float-to-int narrowing is not allowed)
-  line 6, col 7: semantic error: condition of 'if' must be a boolean expression, got int (write e.g. 'x != 0')
-  line 7, col 11: semantic error: '!' needs a boolean operand, got int
+  line 6, col 9: semantic error: call to undefined function 'nosuch'
+  line 7, col 9: semantic error: 'a' is not an array
 [exit 1]

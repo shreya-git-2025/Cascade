@@ -1,0 +1,5 @@
+// a comparison can be stored as 0 / 1, as in C
+int a = 1;
+int flag = a < 2;
+int other = a > 2;
+float f = a == 1;

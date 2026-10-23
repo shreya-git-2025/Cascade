@@ -1,0 +1,8 @@
+6 semantic error(s):
+  line 3, col 9: semantic error: array 'a' cannot be used as a value (use a[i], or pass it directly as a function argument)
+  line 4, col 1: semantic error: cannot assign to array 'a' as a whole (assign to an element, e.g. a[0] = ...)
+  line 5, col 1: semantic error: 'x' is not an array
+  line 6, col 9: semantic error: 'x' is not an array
+  line 7, col 11: semantic error: array index must be an int, got float
+  line 9, col 3: semantic error: array index must be an int, got float
+[exit 1]

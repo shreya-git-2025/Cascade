@@ -19,6 +19,14 @@ enum class OpCode {
     LT_F, LE_F, GT_F, GE_F, EQ_F, NE_F,
     JMP,                  // pc = arg
     JNZ,                  // pop; if != 0 then pc = arg
+    LOADL, STOREL,        // frame-local slot <-> stack (inside functions)
+    CALL,                 // call function #arg: args are on the stack, popped into the new frame
+    RET,                  // arg=1: pop the return value, pop the frame, push the value for the caller
+    POP,                  // discard the top of the stack (unused call result)
+    ALLOC,                // new array of arg elements (ival=1: float); push its address
+    ALOAD,                // pop index, pop array address; push element (bounds-checked)
+    ASTORE,               // pop value, pop index, pop array address; store (bounds-checked)
+    PRINT,                // pop and print one value
     HALT
 };
 
@@ -28,6 +36,7 @@ struct Instr {
     long long ival = 0;   // PUSH_I
     double fval = 0.0;    // PUSH_F
     int line = 0;         // source line, for runtime errors
+    int func = -1;        // function this instruction belongs to (-1 = top-level code)
 };
 
 struct Value {
@@ -37,11 +46,23 @@ struct Value {
 };
 std::string valueText(const Value& v);
 
-struct Bytecode {
-    std::vector<Instr> code;
+// Per-function metadata: where its code starts and what its frame holds.
+struct FuncMeta {
+    std::string name;
+    Type ret = Type::Void;
+    int entry = 0;       // bytecode address of the first instruction
+    int nParams = 0;     // parameters occupy local slots 0 .. nParams-1
     std::vector<std::string> slotNames;
     std::vector<Type> slotTypes;
-    std::vector<int> userSlots; // slots to report as program output
+};
+
+struct Bytecode {
+    std::vector<Instr> code;
+    std::vector<std::string> slotNames; // top-level (global) slots
+    std::vector<Type> slotTypes;
+    std::vector<int> userSlots; // global slots to report as program output
+    std::vector<Type> userElem; // parallel to userSlots: element type if an array, else Unknown
+    std::vector<FuncMeta> funcs;
     void print(std::ostream& out) const;
 };
 
@@ -56,22 +77,38 @@ struct RuntimeError {
 
 class VirtualMachine {
 public:
-    explicit VirtualMachine(const Bytecode& bc, long long maxSteps = 10000000)
-        : bc_(bc), maxSteps_(maxSteps) {}
+    // `out` receives the program's own output (print statements); default std::cout.
+    explicit VirtualMachine(const Bytecode& bc, long long maxSteps = 10000000,
+                            std::ostream* out = nullptr);
 
     // Runs to HALT. Returns false on a runtime error (see error()).
     bool run(std::ostream* trace = nullptr);
 
     const RuntimeError& error() const { return error_; }
     long long steps() const { return steps_; }
-    void printState(std::ostream& out) const; // final values of user variables
+    void printState(std::ostream& out) const; // final values of top-level variables
 
 private:
     const Bytecode& bc_;
     long long maxSteps_;
     long long steps_ = 0;
-    std::vector<Value> slots_;
-    std::vector<Value> stack_;
+    std::ostream* out_;
+    std::vector<Value> slots_;   // top-level (global) variables
+    std::vector<Value> stack_;   // operand stack
+    // One frame per active call. A frame's locals hold the function's
+    // parameters, variables and temporaries, so every recursive call gets
+    // its own copies.
+    struct Frame {
+        int retPc;
+        std::vector<Value> locals;
+    };
+    std::vector<Frame> frames_;
+    // All arrays live here. An array is a header cell (its length) followed
+    // by its elements; the "address" stored in a variable is the header's
+    // index. Cell 0 is a dummy so that address 0 means "no array yet".
+    std::vector<Value> heap_;
+    static constexpr size_t kMaxDepth = 10000;
+    static constexpr size_t kMaxHeap = 10000000;
     RuntimeError error_{"", 0};
 
     Value pop();

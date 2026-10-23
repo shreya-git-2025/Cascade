@@ -1,3 +1,0 @@
-// bodies must be blocks, so there is no dangling-else ambiguity
-int x = 1;
-if (x == 1) x = 2;

@@ -49,6 +49,12 @@ void TacProgram::print(std::ostream& out) const {
     auto tgt = [](int t) { return t < 0 ? std::string("_") : std::to_string(t); };
     for (size_t i = 0; i < code.size(); ++i) {
         const Quad& q = code[i];
+        for (const TacFunc& f : funcs) {
+            if (f.entry == static_cast<int>(i)) {
+                out << "      -- function " << f.name << " (" << f.nParams << " param"
+                    << (f.nParams == 1 ? "" : "s") << ") --\n";
+            }
+        }
         out << std::right << std::setw(4) << i << ":  ";
         switch (q.op) {
             case TacOp::Copy:
@@ -71,6 +77,32 @@ void TacProgram::print(std::ostream& out) const {
             case TacOp::Goto:
                 out << "goto " << tgt(q.target);
                 break;
+            case TacOp::Param:
+                out << "param " << operandText(q.arg1);
+                break;
+            case TacOp::Call:
+                if (q.result.kind != Operand::Kind::None) out << operandText(q.result) << " = ";
+                out << "call " << q.func << ", " << q.argc;
+                break;
+            case TacOp::Return:
+                out << "return";
+                if (q.arg1.kind != Operand::Kind::None) out << " " << operandText(q.arg1);
+                break;
+            case TacOp::ArrLoad:
+                out << operandText(q.result) << " = " << operandText(q.arg1) << "["
+                    << operandText(q.arg2) << "]";
+                break;
+            case TacOp::ArrStore:
+                out << operandText(q.arg1) << "[" << operandText(q.arg2) << "] = "
+                    << operandText(q.result);
+                break;
+            case TacOp::Alloc:
+                out << operandText(q.result) << " = alloc " << operandText(q.arg1)
+                    << (q.isFloat ? " floats" : " ints");
+                break;
+            case TacOp::Print:
+                out << "print " << operandText(q.arg1);
+                break;
             case TacOp::Halt:
                 out << "halt";
                 break;
@@ -89,9 +121,13 @@ int TacGenerator::emit(Quad q) {
     return nextInstr() - 1;
 }
 
-void TacGenerator::addSlot(const std::string& name, Type t) {
-    if (slotType_.emplace(name, t).second) prog_.slots.emplace_back(name, t);
+void TacGenerator::addSlotTo(int func, const std::string& name, Type t) {
+    if (!slotType_.emplace(name, t).second) return;
+    if (func < 0) prog_.slots.emplace_back(name, t);
+    else prog_.funcs[func].slots.emplace_back(name, t);
 }
+
+void TacGenerator::addSlot(const std::string& name, Type t) { addSlotTo(curFunc_, name, t); }
 
 Operand TacGenerator::newTemp(Type t) {
     std::string name = "t" + std::to_string(++tempCount_);
@@ -116,16 +152,71 @@ void TacGenerator::backpatch(const List& list, int target) {
 TacProgram TacGenerator::generate(const NodePtr& program, const std::vector<SymbolEntry>& symbols) {
     prog_ = TacProgram{};
     slotType_.clear();
+    funcRet_.clear();
+    loops_.clear();
     tempCount_ = 0;
-    for (const SymbolEntry& s : symbols) {
-        addSlot(s.unique, s.type);
-        prog_.userVars.push_back(s.unique);
+    curFunc_ = -1;
+
+    // Functions get their own slot tables; top-level code keeps the global one.
+    std::vector<const Node*> defs;
+    std::map<std::string, int> funcIndex;
+    std::vector<NodePtr> topLevel;
+    for (const NodePtr& item : program->kids) {
+        if (item->kind == NodeKind::FuncProto) continue; // declarations generate no code
+        if (item->kind != NodeKind::FuncDef) {
+            topLevel.push_back(item);
+            continue;
+        }
+        TacFunc f;
+        f.name = item->text;
+        f.ret = item->declType;
+        f.nParams = static_cast<int>(item->kids.size()) - 1;
+        funcIndex[f.name] = static_cast<int>(prog_.funcs.size());
+        funcRet_[f.name] = f.ret;
+        prog_.funcs.push_back(f);
+        defs.push_back(item.get());
     }
 
-    // program -> stmt_list:  backpatch(stmt_list.nextlist, <halt>)
-    List next = genStmts(program->kids);
+    for (const SymbolEntry& s : symbols) {
+        // An array variable's slot holds the array's address, an int.
+        Type slotT = s.isArray ? Type::Int : s.type;
+        if (s.isArray) prog_.arrayElem[s.unique] = s.type;
+        if (s.owner.empty()) {
+            addSlotTo(-1, s.unique, slotT);
+            prog_.userVars.push_back(s.unique);
+        } else {
+            addSlotTo(funcIndex.at(s.owner), s.unique, slotT);
+        }
+    }
+
+    // program -> item_list:  backpatch(nextlist, <next instruction>)
+    List next = genStmts(topLevel);
     backpatch(next, nextInstr());
+    auto mainFn = funcIndex.find("main");
+    if (mainFn != funcIndex.end() && prog_.funcs[mainFn->second].nParams == 0) {
+        Quad call{TacOp::Call, {}, {}, {}};
+        call.func = "main";
+        call.argc = 0;
+        curLine_ = defs[mainFn->second]->line;
+        emit(call);
+    }
     emit(Quad{TacOp::Halt, {}, {}, {}});
+
+    // Function bodies follow the top-level code, one after another.
+    for (size_t i = 0; i < defs.size(); ++i) {
+        curFunc_ = static_cast<int>(i);
+        const Node& def = *defs[i];
+        prog_.funcs[i].entry = nextInstr();
+        curLine_ = def.line;
+        List bodyNext = genStmt(def.kids.back());
+        backpatch(bodyNext, nextInstr());
+        // Falling off the end returns 0 (or nothing, for void functions).
+        Quad ret{TacOp::Return, {}, {}, {}};
+        if (def.declType == Type::Float) ret.arg1 = Operand::floatConst(0.0);
+        else if (def.declType == Type::Int) ret.arg1 = Operand::intConst(0);
+        emit(ret);
+    }
+    curFunc_ = -1;
     return prog_;
 }
 
@@ -144,6 +235,19 @@ TacGenerator::List TacGenerator::genStmt(const NodePtr& node) {
     curLine_ = n.line;
     switch (n.kind) {
         case NodeKind::Decl: {
+            if (n.isArray) {
+                // int a[N] = {...};   a = alloc N;  a[0] = ...;  a[1] = ...
+                Quad alloc{TacOp::Alloc, Operand::var(n.resolved), Operand::intConst(n.arraySize), {}};
+                alloc.isFloat = n.declType == Type::Float;
+                emit(alloc);
+                for (size_t k = 0; k < n.kids.size(); ++k) {
+                    Operand value = genValue(n.kids[k]);
+                    curLine_ = n.line;
+                    emit(Quad{TacOp::ArrStore, value, Operand::var(n.resolved),
+                              Operand::intConst(static_cast<long long>(k))});
+                }
+                return {};
+            }
             // `int x;` is zero-initialized (see semantic.h for the policy)
             Operand value = n.kids.empty()
                 ? (n.declType == Type::Float ? Operand::floatConst(0.0) : Operand::intConst(0))
@@ -175,17 +279,70 @@ TacGenerator::List TacGenerator::genStmt(const NodePtr& node) {
         }
 
         case NodeKind::While: {
-            // S -> while M1 ( B ) M2 S1
+            // S -> while M1 ( B ) M2 S1 [ step ]
             int loopStart = nextInstr();                      // M1
             BoolLists c = genCond(n.kids[0]);
             backpatch(c.truelist, nextInstr());               // M2
+            loops_.emplace_back();
             List bodyNext = genStmt(n.kids[1]);
-            backpatch(bodyNext, loopStart);
+            LoopCtx ctx = loops_.back();
+            loops_.pop_back();
+            if (n.kids.size() == 3) {
+                // a lowered `for`: the body (and `continue`) fall into the step
+                int stepStart = nextInstr();
+                backpatch(bodyNext, stepStart);
+                backpatch(ctx.continues, stepStart);
+                List stepNext = genStmt(n.kids[2]);
+                backpatch(stepNext, nextInstr());
+            } else {
+                backpatch(bodyNext, loopStart);
+                backpatch(ctx.continues, loopStart);
+            }
             curLine_ = n.line;
             Quad back{TacOp::Goto, {}, {}, {}};
             back.target = loopStart;
             emit(back);
-            return c.falselist;
+            // leaving the loop: condition false, or a `break`
+            return merge(c.falselist, ctx.breaks);
+        }
+
+        case NodeKind::ArrAssign: {
+            Operand index = genValue(n.kids[0]);
+            Operand value = genValue(n.kids[1]);
+            curLine_ = n.line;
+            emit(Quad{TacOp::ArrStore, value, Operand::var(n.resolved), index});
+            return {};
+        }
+
+        case NodeKind::Call:
+            genCall(n, false);
+            return {};
+
+        case NodeKind::Return: {
+            Quad ret{TacOp::Return, {}, {}, {}};
+            if (!n.kids.empty()) ret.arg1 = genValue(n.kids[0]);
+            curLine_ = n.line;
+            emit(ret);
+            return {}; // control never falls through a return
+        }
+
+        case NodeKind::Print: {
+            Operand value = genValue(n.kids[0]);
+            curLine_ = n.line;
+            emit(Quad{TacOp::Print, {}, value, {}});
+            return {};
+        }
+
+        case NodeKind::Break: {
+            int j = emit(Quad{TacOp::Goto, {}, {}, {}});
+            loops_.back().breaks.push_back(j);
+            return {};
+        }
+
+        case NodeKind::Continue: {
+            int j = emit(Quad{TacOp::Goto, {}, {}, {}});
+            loops_.back().continues.push_back(j);
+            return {};
         }
 
         case NodeKind::Block:
@@ -206,6 +363,20 @@ Operand TacGenerator::genValue(const NodePtr& node) {
         case NodeKind::IntLit:   return Operand::intConst(std::stoll(n.text));
         case NodeKind::FloatLit: return Operand::floatConst(std::stod(n.text));
         case NodeKind::Var:      return Operand::var(n.resolved);
+
+        case NodeKind::BoolToInt: // comparison used as a number: 1 if true, else 0
+            return materializeBool(n.kids[0]);
+
+        case NodeKind::Index: {
+            Operand index = genValue(n.kids[0]);
+            Operand t = newTemp(n.type);
+            curLine_ = n.line;
+            emit(Quad{TacOp::ArrLoad, t, Operand::var(n.resolved), index});
+            return t;
+        }
+
+        case NodeKind::Call:
+            return genCall(n, true);
 
         case NodeKind::IntToFloat: {
             Operand a = genValue(n.kids[0]);
@@ -241,6 +412,25 @@ Operand TacGenerator::genValue(const NodePtr& node) {
         default:
             return {};
     }
+}
+
+// Arguments are evaluated first (left to right, nested calls complete before
+// this call's own params are emitted), then pushed by a run of `param` quads
+// immediately before the `call`.
+Operand TacGenerator::genCall(const Node& n, bool wantValue) {
+    std::vector<Operand> args;
+    for (const NodePtr& arg : n.kids) args.push_back(genValue(arg));
+    curLine_ = n.line;
+    for (const Operand& a : args) emit(Quad{TacOp::Param, {}, a, {}});
+
+    Type ret = funcRet_.at(n.text);
+    Operand result;
+    if (wantValue && ret != Type::Void) result = newTemp(ret);
+    Quad call{TacOp::Call, result, {}, {}};
+    call.func = n.text;
+    call.argc = static_cast<int>(args.size());
+    emit(call);
+    return result;
 }
 
 TacGenerator::BoolLists TacGenerator::genCond(const NodePtr& node) {

@@ -1,0 +1,2 @@
+runtime error at line 1: stack overflow: call depth of 10000 exceeded in 'forever' (runaway recursion?)
+[exit 3]

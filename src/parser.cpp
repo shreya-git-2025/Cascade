@@ -85,11 +85,60 @@ NodePtr Parser::parse(std::ostream* trace) {
                 std::vector<Symbol> expected = table.expectedTerminals(s);
                 std::ostringstream msg;
                 msg << "unexpected " << describeToken(tok);
-                if (!expected.empty() && expected.size() <= 8) {
+                auto expects = [&](TokenType t) {
+                    for (Symbol x : expected) if (x == term(t)) return true;
+                    return false;
+                };
+                // Where a whole expression could continue, ~13 operators are
+                // acceptable; say "an operator" instead of listing them all.
+                static const TokenType kOperators[] = {
+                    TokenType::PLUS, TokenType::MINUS, TokenType::STAR, TokenType::SLASH,
+                    TokenType::PERCENT, TokenType::LT, TokenType::LE, TokenType::GT,
+                    TokenType::GE, TokenType::EQ, TokenType::NE, TokenType::AND_AND,
+                    TokenType::OR_OR};
+                auto isOperator = [&](Symbol x) {
+                    for (TokenType t : kOperators) if (x == term(t)) return true;
+                    return false;
+                };
+                size_t operatorCount = 0;
+                for (Symbol x : expected) if (isOperator(x)) ++operatorCount;
+                const bool groupOperators = operatorCount >= 8;
+                std::vector<std::string> items;
+                if (groupOperators) items.push_back("an operator");
+                for (Symbol x : expected) {
+                    if (groupOperators && isOperator(x)) continue;
+                    items.push_back("'" + symbolName(x) + "'");
+                }
+
+                // The most common mistake: a forgotten ';' at the end of a
+                // statement, noticed when the NEXT statement's first token
+                // shows up in the middle of an expression.
+                auto startsStatement = [](TokenType t) {
+                    switch (t) {
+                        case TokenType::KW_INT: case TokenType::KW_FLOAT: case TokenType::KW_VOID:
+                        case TokenType::KW_IF: case TokenType::KW_WHILE: case TokenType::KW_FOR:
+                        case TokenType::KW_RETURN: case TokenType::KW_PRINT:
+                        case TokenType::KW_BREAK: case TokenType::KW_CONTINUE:
+                        case TokenType::IDENTIFIER: case TokenType::LBRACE:
+                        case TokenType::RBRACE: case TokenType::END_OF_FILE:
+                            return true;
+                        default:
+                            return false;
+                    }
+                };
+
+                if (groupOperators && expects(TokenType::SEMICOLON) && startsStatement(tok.type)) {
+                    msg << " (missing ';' before it?)";
+                } else if (expects(TokenType::KW_IF) && expects(TokenType::KW_WHILE)) {
+                    // far too many tokens to list: this is "a statement could start here"
+                    msg << ", expected a statement";
+                    if (expects(TokenType::RBRACE)) msg << " or '}'";
+                    if (expects(TokenType::END_OF_FILE)) msg << " or end of input";
+                } else if (!items.empty() && items.size() <= 10) {
                     msg << ", expected ";
-                    for (size_t i = 0; i < expected.size(); ++i) {
-                        if (i) msg << (i + 1 == expected.size() ? " or " : ", ");
-                        msg << "'" << symbolName(expected[i]) << "'";
+                    for (size_t i = 0; i < items.size(); ++i) {
+                        if (i) msg << (i + 1 == items.size() ? " or " : ", ");
+                        msg << items[i];
                     }
                 } else if (table.action(s, term(TokenType::SEMICOLON)).kind != ActKind::Error) {
                     // too many alternatives to list, but a ';' would have

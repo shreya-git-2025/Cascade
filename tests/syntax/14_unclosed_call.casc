@@ -1,0 +1,2 @@
+int f(int x) { return x; }
+int y = f(1, 2;

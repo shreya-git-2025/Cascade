@@ -1,0 +1,47 @@
+int counter = 0;
+int hist[5];
+
+void bump() { counter++; }
+
+int gcd(int a, int b) {
+    while (b != 0) { int t = b; b = a % b; a = t; }
+    return a;
+}
+int isPrime(int n) {
+    if (n < 2) { return 0; }
+    for (int i = 2; i * i <= n; i++) {
+        if (n % i == 0) { return 0; }
+    }
+    return 1;
+}
+float average(float xs[], int n) {
+    float total = 0.0;
+    for (int i = 0; i < n; i++) { total += xs[i]; }
+    return total / n;
+}
+int grade(int score) {
+    if (score >= 90) { return 4; }
+    else if (score >= 80) { return 3; }
+    else if (score >= 70) { return 2; }
+    else { return 1; }
+}
+int main() {
+    bump(); bump(); bump();
+    print(counter);
+    print(gcd(48, 18));
+    int found = 0;
+    for (int n = 1; n < 50; n++) {
+        if (n % 2 == 0) { continue; }
+        if (isPrime(n)) { found++; hist[found % 5] += 1; }
+        if (found == 10) { break; }
+    }
+    print(found);
+    for (int k = 0; k < 5; k++) { print(hist[k]); }
+    float xs[4] = {1.5, 2.5, 3.0, 5};
+    print(average(xs, 4));
+    print(grade(95)); print(grade(85)); print(grade(75)); print(grade(10));
+    int x = 7;
+    x *= 3; x -= 1; x /= 4; x %= 3;
+    print(x);
+    return 0;
+}

@@ -1,9 +1,10 @@
 # Cascade
 
 A compiler and stack-based virtual machine for a small C-like imperative
-language (int/float variables, arithmetic, relational and short-circuit
-boolean operators, `if`/`else`, `while`). Every stage is hand-written in
-C++17 with no external dependencies.
+language (int/float variables, **functions with recursion**, **1-D arrays**,
+arithmetic, relational and short-circuit boolean operators, `if`/`else`,
+`while`/`for`, `print`). Every stage is hand-written in C++17 with no
+external dependencies.
 
 ```
 source ─► Lexer ─► SLR parser ─► Semantic analyzer ─► TAC generator ─► Stack VM ─► output
@@ -11,16 +12,17 @@ source ─► Lexer ─► SLR parser ─► Semantic analyzer ─► TAC genera
                                   type checks)
 ```
 
-## Status (Review 2)
+## Status (Final review)
 
 - [x] Grammar & language spec — [`docs/language-spec.md`](docs/language-spec.md)
 - [x] Token classes & DFA scanner design — [`docs/token-classes-dfa.md`](docs/token-classes-dfa.md)
 - [x] **Stage 1** Lexical analyzer
-- [x] **Stage 2** FIRST/FOLLOW, LR(0) automaton and SLR table (78 states, 0 conflicts); shift-reduce parser building the AST
+- [x] **Stage 2** FIRST/FOLLOW, LR(0) automaton and SLR table (200 states, 0 unresolved conflicts); shift-reduce parser building the AST
 - [x] **Stage 3** Semantic analyzer — scoped symbol table, type checking, implicit int→float widening
 - [x] **Stage 4** Three-address code with truelist/falselist/nextlist backpatching
 - [x] **Stage 5** Stack VM — assembler, dispatch loop, execution trace, runtime errors
-- [x] Test suite — 37 programs across all five error stages + runner
+- [x] **Functions and arrays** (final-review requirement) — see [`docs/functions-and-arrays.md`](docs/functions-and-arrays.md)
+- [x] Test suite — 73 programs across all five error stages + runner; plus differential testing against `gcc`
 - [ ] Final phase: parser error recovery (report several syntax errors per run), more end-to-end tests, Flex/Bison cross-check, optional LLVM IR lowering
 
 How each stage works: [`docs/implementation.md`](docs/implementation.md).
@@ -104,10 +106,34 @@ docs/
 
 ## Language notes
 
-- `//` line comments are accepted (handy for annotating test programs).
+Full description of the final-review features (functions, arrays, `print`,
+`for`, `break`/`continue`, `else if`, compound assignment): [`docs/functions-and-arrays.md`](docs/functions-and-arrays.md).
+
+```c
+int fib(int n) {
+    if (n < 2) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+void bubbleSort(int a[], int n) { /* ... */ }
+
+int main() {
+    int data[5] = {5, 3, 9, 1, 4};
+    bubbleSort(data, 5);
+    for (int i = 0; i < 5; i++) print(data[i]);
+    print(fib(10));
+    return 0;
+}
+```
+
+- `print(expr);` writes one value per line. When the program ends, the final
+  value of every **top-level** variable (arrays included) is also printed.
+- Top-level statements run in order; if a `main()` function exists it runs
+  after them. Functions may be called before they are defined.
+- `//` and `/* ... */` comments are accepted.
 - Bare declarations (`int x;`) are zero-initialized; reading one before
   assigning it gives a warning.
-- Conditions must be boolean: write `while (x != 0)`, not `while (x)`.
+- C-style truthiness: a number is a valid condition (`while (n)`), and a
+  comparison can be used as 0/1 (`count += x > 0;`).
 - `a < b < c` is rejected by design (keeps the grammar SLR(1)).
-- There are no I/O statements; a program's output is the final value of
-  each variable, printed when the VM halts.
+- Not supported: strings/`char`, `printf`/`scanf`, 2-D arrays, pointers,
+  `switch`, `do`/`while`, the `?:` operator.

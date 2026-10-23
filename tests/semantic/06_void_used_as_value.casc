@@ -1,0 +1,3 @@
+void nothing() { }
+int x = nothing();
+int y = nothing() + 1;

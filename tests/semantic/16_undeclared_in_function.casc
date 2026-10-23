@@ -1,0 +1,8 @@
+int f(int n) {
+    return n + missing;
+}
+void g() {
+    count = 1;
+    undefinedCall();
+}
+int later() { return 1; }

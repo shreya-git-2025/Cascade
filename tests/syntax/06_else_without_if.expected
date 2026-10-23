@@ -1,2 +1,2 @@
-  line 2, col 1: syntax error: unexpected 'else', expected 'id', 'int', 'float', 'if', 'while', '{', '}' or '$'
+  line 2, col 1: syntax error: unexpected 'else', expected a statement or end of input
 [exit 1]

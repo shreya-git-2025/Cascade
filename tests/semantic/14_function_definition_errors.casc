@@ -1,0 +1,7 @@
+int f(int a) { return a; }
+int f(int a) { return a + 1; }
+int g(int a, int a) { return a; }
+int h(int a);
+float h(int a) { return 1.0; }
+int k(int a);
+int main(int argc) { return 0; }

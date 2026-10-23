@@ -3,5 +3,5 @@ int a = 1;
 int a = 2;
 b = 3;
 int c = 2.5;
-if (a + 1) { a = 0; }
-float d = !a;
+int e = nosuch(1);
+int g = a[0];

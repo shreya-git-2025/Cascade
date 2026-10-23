@@ -1,0 +1,14 @@
+int n = 100;
+int f(int n) {          // parameter shadows the global
+    int t = n * 2;
+    { int t = n + 1; n = t; }
+    return n + t;
+}
+int g() { return n; }   // sees the global
+int main() {
+    print(f(5));
+    print(g());
+    n = 7;
+    print(g());
+    return 0;
+}

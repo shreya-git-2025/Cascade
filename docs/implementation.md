@@ -1,5 +1,7 @@
 # Cascade — Implementation Notes (Stages 2–5)
 
+> Functions, arrays, `print`, `for` and the other final-review additions are covered in [`functions-and-arrays.md`](functions-and-arrays.md); this document describes the stages themselves.
+
 How each pipeline stage after the lexer works, what it produces, and
 where to find it in the code. The lexer is described in
 [token-classes-dfa.md](token-classes-dfa.md); the grammar in
@@ -41,7 +43,7 @@ so the table can never drift out of sync with the grammar:
    (`computeFirst`, `computeFollow`).
 2. **LR(0) canonical collection** — `closure()` and `gotoSet()` exactly as
    in the Dragon Book; states are discovered breadth-first from
-   `closure({S' -> . program})`. Result: **78 states**.
+   `closure({S' -> . program})`. Result: **200 states** (78 before functions and arrays were added).
 3. **ACTION / GOTO** — shift on terminal transitions, goto on nonterminal
    transitions, reduce `A -> α.` on every terminal in FOLLOW(A), accept
    on `S' -> program .` with lookahead `$`. Any cell written twice with

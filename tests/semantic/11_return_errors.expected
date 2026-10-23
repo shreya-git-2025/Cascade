@@ -1,0 +1,6 @@
+4 semantic error(s):
+  line 1, col 11: semantic error: return type mismatch: function 'a' returns int, got float
+  line 2, col 11: semantic error: function 'b' must return a value of type int
+  line 3, col 12: semantic error: void function 'c' cannot return a value
+  line 4, col 1: semantic error: 'return' outside of a function
+[exit 1]

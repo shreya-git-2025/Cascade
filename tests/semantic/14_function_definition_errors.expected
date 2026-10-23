@@ -1,0 +1,8 @@
+6 semantic error(s):
+  line 2, col 5: semantic error: redefinition of function 'f' (first defined at line 1)
+  line 3, col 14: semantic error: duplicate parameter name 'a' in function 'g'
+  line 4, col 5: semantic error: function 'h' is declared but never defined
+  line 5, col 7: semantic error: conflicting declaration of function 'h' (first declared at line 4 with a different signature)
+  line 6, col 5: semantic error: function 'k' is declared but never defined
+  line 7, col 5: semantic error: 'main' must not take parameters
+[exit 1]

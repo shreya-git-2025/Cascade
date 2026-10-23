@@ -1,0 +1,4 @@
+/* A block comment
+   spanning several lines */
+int x = 1; /* trailing */ int y = 2;
+/* sum */ int z = x + /* inline */ y;

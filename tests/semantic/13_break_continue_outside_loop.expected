@@ -1,0 +1,5 @@
+3 semantic error(s):
+  line 1, col 1: semantic error: 'break' outside of a loop
+  line 2, col 10: semantic error: 'continue' outside of a loop
+  line 3, col 11: semantic error: 'break' outside of a loop
+[exit 1]

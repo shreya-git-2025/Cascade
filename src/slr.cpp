@@ -164,6 +164,16 @@ void SlrTable::setAction(int state, Symbol t, TableEntry e) {
     TableEntry& slot = action_[state][t];
     if (slot.kind != ActKind::Error && (slot.kind != e.kind || slot.target != e.target)) {
         bool sr = slot.kind == ActKind::Shift || e.kind == ActKind::Shift;
+        if (sr && t == term(TokenType::KW_ELSE)) {
+            // dangling else: `if (a) if (b) s1; else s2;` — shift, so the
+            // else pairs with the nearest unmatched if
+            resolved_.push_back(Conflict{
+                state, t,
+                "shift/reduce conflict in state " + std::to_string(state) + " on 'else': " +
+                    describe(slot) + " vs " + describe(e) + "  -> resolved as shift (dangling else)"});
+            if (e.kind == ActKind::Shift) slot = e;
+            return;
+        }
         conflicts_.push_back(Conflict{
             state, t,
             std::string(sr ? "shift/reduce" : "reduce/reduce") + " conflict in state " +
@@ -277,4 +287,8 @@ void SlrTable::printTable(std::ostream& out) const {
     if (conflicts_.empty()) out << " — the grammar is SLR(1).\n";
     else out << ":\n";
     for (const Conflict& c : conflicts_) out << "  " << c.description << "\n";
+    if (!resolved_.empty()) {
+        out << resolved_.size() << " conflict(s) resolved on purpose:\n";
+        for (const Conflict& c : resolved_) out << "  " << c.description << "\n";
+    }
 }

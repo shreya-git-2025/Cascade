@@ -1,2 +1,2 @@
-  line 5, col 11: syntax error: unexpected '<', expected '+', '-', '&&', '||', ')' or ';'
+  line 5, col 11: syntax error: unexpected '<', expected '+', '-', '&&', '||', ')', '}', ']', ';' or ','
 [exit 1]

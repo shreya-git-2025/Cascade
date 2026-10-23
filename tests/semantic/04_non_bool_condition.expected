@@ -1,3 +1,0 @@
-1 semantic error(s):
-  line 2, col 8: semantic error: condition of 'while' must be a boolean expression, got int (write e.g. 'x != 0')
-[exit 1]

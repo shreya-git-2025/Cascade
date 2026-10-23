@@ -48,6 +48,10 @@ public:
     }
     int numStates() const { return static_cast<int>(states_.size()); }
     const std::vector<Conflict>& conflicts() const { return conflicts_; }
+    // The dangling-else shift/reduce conflict is resolved on purpose (shift:
+    // an `else` binds to the nearest `if`, as in C). It is listed here, not in
+    // conflicts(), so every OTHER conflict still blocks the compiler.
+    const std::vector<Conflict>& resolvedConflicts() const { return resolved_; }
 
     // Terminals with a non-error ACTION in this state — the "expected" set
     // reported in syntax errors.
@@ -78,6 +82,7 @@ private:
     std::vector<std::vector<TableEntry>> action_; // [state][terminal]
     std::vector<std::vector<int>> goto_;          // [state][nonterminal]
     std::vector<Conflict> conflicts_;
+    std::vector<Conflict> resolved_;
 };
 
 #endif // CASCADE_SLR_H

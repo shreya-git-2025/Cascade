@@ -1,0 +1,8 @@
+
+=== PROGRAM STATE (after 384 VM steps) ===
+  total     int    = 153
+  i         int    = 6
+  k         int    = 3
+  sign      int    = -1
+  v         int    = -4
+[exit 0]

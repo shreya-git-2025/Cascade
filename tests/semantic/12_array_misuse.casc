@@ -1,0 +1,9 @@
+int a[3];
+int x = 1;
+int y = a;
+a = 5;
+x[0] = 1;
+int z = x[1];
+int w = a[1.5];
+float f = 2.5;
+a[f] = 1;

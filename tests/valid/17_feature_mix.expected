@@ -1,0 +1,19 @@
+3
+6
+10
+2
+2
+2
+2
+2
+3.0
+4
+3
+2
+1
+2
+
+=== PROGRAM STATE (after 2517 VM steps) ===
+  counter   int    = 3
+  hist      int[5] = [2, 2, 2, 2, 2]
+[exit 0]

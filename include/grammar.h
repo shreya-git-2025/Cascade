@@ -18,14 +18,30 @@
 enum class NonTerminal {
     ProgramPrime, // augmented start symbol S'
     Program,
+    ItemList,     // top level: statements and function definitions
+    Item,
+    FuncDef,
+    FuncProto,    // forward declaration: signature followed by ';'
+    Params,
+    Param,
     StmtList,
     Stmt,
     DeclStmt,
     Type,
     AssignStmt,
+    Simple,       // assignment without the ';' (so `for` can reuse it)
+    Lvalue,       // x   or   a[expr]
+    CallStmt,
+    ReturnStmt,
+    PrintStmt,
+    BreakStmt,
+    ContinueStmt,
+    ForStmt,
+    ForInit,
     IfStmt,
     WhileStmt,
     Block,
+    ExprList,     // call arguments and array initializers
     Expr,
     AndExpr,
     NotExpr,
@@ -34,7 +50,6 @@ enum class NonTerminal {
     ArithExpr,
     Term,
     Factor,
-    ItemList, Item, FuncDecl, ParamList, Param, ArgList, CallStmt, ReturnStmt, PrintStmt,
     Count
 };
 

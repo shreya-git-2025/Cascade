@@ -1,0 +1,5 @@
+3 semantic error(s):
+  line 2, col 16: semantic error: use of undeclared variable 'missing'
+  line 5, col 5: semantic error: assignment to undeclared variable 'count'
+  line 6, col 5: semantic error: call to undefined function 'undefinedCall'
+[exit 1]

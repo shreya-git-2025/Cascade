@@ -40,104 +40,113 @@ LINE  COL   TYPE            LEXEME
 
 === PARSE TRACE ===
 STACK                                           LOOKAHEAD     ACTION
-0                                               int           shift 10
-0 int 10                                        id            reduce 11: type -> int
-0 type 9                                        id            shift 17
-0 type 9 id 17                                  =             shift 23
-0 type 9 id 17 = 23                             int_lit       shift 36
-0 type 9 id 17 = 23 int_lit 36                  ;             reduce 43: factor -> int_lit
-0 type 9 id 17 = 23 factor 32                   ;             reduce 39: term -> factor
-0 type 9 id 17 = 23 term 31                     ;             reduce 35: arith_expr -> term
-0 type 9 id 17 = 23 arith_expr 30               ;             reduce 26: rel_expr -> arith_expr
-0 type 9 id 17 = 23 rel_expr 29                 ;             reduce 24: not_expr -> rel_expr
-0 type 9 id 17 = 23 not_expr 27                 ;             reduce 22: and_expr -> not_expr
-0 type 9 id 17 = 23 and_expr 26                 ;             reduce 20: expr -> and_expr
-0 type 9 id 17 = 23 expr 43                     ;             shift 64
-0 type 9 id 17 = 23 expr 43 ; 64                int           reduce 9: decl_stmt -> type id = expr ;
-0 decl_stmt 4                                   int           reduce 4: stmt -> decl_stmt
-0 stmt 3                                        int           reduce 3: stmt_list -> stmt
-0 stmt_list 2                                   int           shift 10
-0 stmt_list 2 int 10                            id            reduce 11: type -> int
-0 stmt_list 2 type 9                            id            shift 17
-0 stmt_list 2 type 9 id 17                      =             shift 23
-0 stmt_list 2 type 9 id 17 = 23                 int_lit       shift 36
-0 stmt_list 2 type 9 id 17 = 23 int_lit 36      ;             reduce 43: factor -> int_lit
-0 stmt_list 2 type 9 id 17 = 23 factor 32       ;             reduce 39: term -> factor
-0 stmt_list 2 type 9 id 17 = 23 term 31         ;             reduce 35: arith_expr -> term
-0 stmt_list 2 type 9 id 17 = 23 arith_expr 30   ;             reduce 26: rel_expr -> arith_expr
-0 stmt_list 2 type 9 id 17 = 23 rel_expr 29     ;             reduce 24: not_expr -> rel_expr
-0 stmt_list 2 type 9 id 17 = 23 not_expr 27     ;             reduce 22: and_expr -> not_expr
-0 stmt_list 2 type 9 id 17 = 23 and_expr 26     ;             reduce 20: expr -> and_expr
-0 stmt_list 2 type 9 id 17 = 23 expr 43         ;             shift 64
-0 stmt_list 2 type 9 id 17 = 23 expr 43 ; 64    if            reduce 9: decl_stmt -> type id = expr ;
-0 stmt_list 2 decl_stmt 4                       if            reduce 4: stmt -> decl_stmt
-0 stmt_list 2 stmt 16                           if            reduce 2: stmt_list -> stmt_list stmt
-0 stmt_list 2                                   if            shift 13
-0 stmt_list 2 if 13                             (             shift 19
-0 stmt_list 2 if 13 ( 19                        id            shift 35
-0 stmt_list 2 if 13 ( 19 id 35                  <             reduce 42: factor -> id
-0 stmt_list 2 if 13 ( 19 factor 32              <             reduce 39: term -> factor
-0 stmt_list 2 if 13 ( 19 term 31                <             reduce 35: arith_expr -> term
-0 stmt_list 2 if 13 ( 19 arith_expr 30          <             shift 49
-0 stmt_list 2 if 13 ( 19 arith_expr 30 < 49     id            reduce 27: relop -> <
-... t_list 2 if 13 ( 19 arith_expr 30 relop 48  id            shift 35
-...  2 if 13 ( 19 arith_expr 30 relop 48 id 35  )             reduce 42: factor -> id
-... f 13 ( 19 arith_expr 30 relop 48 factor 32  )             reduce 39: term -> factor
-...  if 13 ( 19 arith_expr 30 relop 48 term 31  )             reduce 35: arith_expr -> term
-...  ( 19 arith_expr 30 relop 48 arith_expr 67  )             reduce 25: rel_expr -> arith_expr relop arith_expr
-0 stmt_list 2 if 13 ( 19 rel_expr 29            )             reduce 24: not_expr -> rel_expr
-0 stmt_list 2 if 13 ( 19 not_expr 27            )             reduce 22: and_expr -> not_expr
-0 stmt_list 2 if 13 ( 19 and_expr 26            )             reduce 20: expr -> and_expr
-0 stmt_list 2 if 13 ( 19 expr 40                )             shift 62
-0 stmt_list 2 if 13 ( 19 expr 40 ) 62           {             shift 15
-0 stmt_list 2 if 13 ( 19 expr 40 ) 62 { 15      id            shift 12
-... _list 2 if 13 ( 19 expr 40 ) 62 { 15 id 12  =             shift 18
-...  2 if 13 ( 19 expr 40 ) 62 { 15 id 12 = 18  id            shift 35
-... 13 ( 19 expr 40 ) 62 { 15 id 12 = 18 id 35  +             reduce 42: factor -> id
-...  19 expr 40 ) 62 { 15 id 12 = 18 factor 32  +             reduce 39: term -> factor
-...  ( 19 expr 40 ) 62 { 15 id 12 = 18 term 31  +             reduce 35: arith_expr -> term
-... expr 40 ) 62 { 15 id 12 = 18 arith_expr 30  +             shift 55
-... 40 ) 62 { 15 id 12 = 18 arith_expr 30 + 55  int_lit       shift 36
-... 5 id 12 = 18 arith_expr 30 + 55 int_lit 36  ;             reduce 43: factor -> int_lit
-... 15 id 12 = 18 arith_expr 30 + 55 factor 32  ;             reduce 39: term -> factor
-... { 15 id 12 = 18 arith_expr 30 + 55 term 68  ;             reduce 33: arith_expr -> arith_expr + term
-... expr 40 ) 62 { 15 id 12 = 18 arith_expr 30  ;             reduce 26: rel_expr -> arith_expr
-... 9 expr 40 ) 62 { 15 id 12 = 18 rel_expr 29  ;             reduce 24: not_expr -> rel_expr
-... 9 expr 40 ) 62 { 15 id 12 = 18 not_expr 27  ;             reduce 22: and_expr -> not_expr
-... 9 expr 40 ) 62 { 15 id 12 = 18 and_expr 26  ;             reduce 20: expr -> and_expr
-...  ( 19 expr 40 ) 62 { 15 id 12 = 18 expr 25  ;             shift 44
-...  expr 40 ) 62 { 15 id 12 = 18 expr 25 ; 44  }             reduce 13: assign_stmt -> id = expr ;
-... if 13 ( 19 expr 40 ) 62 { 15 assign_stmt 5  }             reduce 5: stmt -> assign_stmt
-... list 2 if 13 ( 19 expr 40 ) 62 { 15 stmt 3  }             reduce 3: stmt_list -> stmt
-...  if 13 ( 19 expr 40 ) 62 { 15 stmt_list 21  }             shift 42
-... 3 ( 19 expr 40 ) 62 { 15 stmt_list 21 } 42  else          reduce 17: block -> { stmt_list }
-0 stmt_list 2 if 13 ( 19 expr 40 ) 62 block 74  else          shift 76
-... 2 if 13 ( 19 expr 40 ) 62 block 74 else 76  {             shift 15
-... 13 ( 19 expr 40 ) 62 block 74 else 76 { 15  id            shift 12
-... 9 expr 40 ) 62 block 74 else 76 { 15 id 12  =             shift 18
-... r 40 ) 62 block 74 else 76 { 15 id 12 = 18  id            shift 35
-...  62 block 74 else 76 { 15 id 12 = 18 id 35  -             reduce 42: factor -> id
-... block 74 else 76 { 15 id 12 = 18 factor 32  -             reduce 39: term -> factor
-... 2 block 74 else 76 { 15 id 12 = 18 term 31  -             reduce 35: arith_expr -> term
-... k 74 else 76 { 15 id 12 = 18 arith_expr 30  -             shift 56
-... else 76 { 15 id 12 = 18 arith_expr 30 - 56  int_lit       shift 36
-... 5 id 12 = 18 arith_expr 30 - 56 int_lit 36  ;             reduce 43: factor -> int_lit
-... 15 id 12 = 18 arith_expr 30 - 56 factor 32  ;             reduce 39: term -> factor
-... { 15 id 12 = 18 arith_expr 30 - 56 term 69  ;             reduce 34: arith_expr -> arith_expr - term
-... k 74 else 76 { 15 id 12 = 18 arith_expr 30  ;             reduce 26: rel_expr -> arith_expr
-... ock 74 else 76 { 15 id 12 = 18 rel_expr 29  ;             reduce 24: not_expr -> rel_expr
-... ock 74 else 76 { 15 id 12 = 18 not_expr 27  ;             reduce 22: and_expr -> not_expr
-... ock 74 else 76 { 15 id 12 = 18 and_expr 26  ;             reduce 20: expr -> and_expr
-... 2 block 74 else 76 { 15 id 12 = 18 expr 25  ;             shift 44
-... ck 74 else 76 { 15 id 12 = 18 expr 25 ; 44  }             reduce 13: assign_stmt -> id = expr ;
-... 0 ) 62 block 74 else 76 { 15 assign_stmt 5  }             reduce 5: stmt -> assign_stmt
-...  expr 40 ) 62 block 74 else 76 { 15 stmt 3  }             reduce 3: stmt_list -> stmt
-... 40 ) 62 block 74 else 76 { 15 stmt_list 21  }             shift 42
-... 62 block 74 else 76 { 15 stmt_list 21 } 42  $             reduce 17: block -> { stmt_list }
-...  19 expr 40 ) 62 block 74 else 76 block 77  $             reduce 15: if_stmt -> if ( expr ) block else block
-0 stmt_list 2 if_stmt 6                         $             reduce 6: stmt -> if_stmt
-0 stmt_list 2 stmt 16                           $             reduce 2: stmt_list -> stmt_list stmt
-0 stmt_list 2                                   $             reduce 1: program -> stmt_list
+0                                               int           shift 20
+0 int 20                                        id            reduce 41: type -> int
+0 type 7                                        id            shift 34
+0 type 7 id 34                                  =             shift 74
+0 type 7 id 34 = 74                             int_lit       shift 59
+0 type 7 id 34 = 74 int_lit 59                  ;             reduce 98: factor -> int_lit
+0 type 7 id 34 = 74 factor 55                   ;             reduce 91: term -> factor
+0 type 7 id 34 = 74 term 54                     ;             reduce 87: arith_expr -> term
+0 type 7 id 34 = 74 arith_expr 53               ;             reduce 78: rel_expr -> arith_expr
+0 type 7 id 34 = 74 rel_expr 52                 ;             reduce 76: not_expr -> rel_expr
+0 type 7 id 34 = 74 not_expr 50                 ;             reduce 74: and_expr -> not_expr
+0 type 7 id 34 = 74 and_expr 49                 ;             reduce 72: expr -> and_expr
+0 type 7 id 34 = 74 expr 123                    ;             shift 156
+0 type 7 id 34 = 74 expr 123 ; 156              int           reduce 36: decl_stmt -> type id = expr ;
+0 decl_stmt 9                                   int           reduce 25: stmt -> decl_stmt
+0 stmt 4                                        int           reduce 4: item -> stmt
+0 item 3                                        int           reduce 3: item_list -> item
+0 item_list 2                                   int           shift 20
+0 item_list 2 int 20                            id            reduce 41: type -> int
+0 item_list 2 type 7                            id            shift 34
+0 item_list 2 type 7 id 34                      =             shift 74
+0 item_list 2 type 7 id 34 = 74                 int_lit       shift 59
+0 item_list 2 type 7 id 34 = 74 int_lit 59      ;             reduce 98: factor -> int_lit
+0 item_list 2 type 7 id 34 = 74 factor 55       ;             reduce 91: term -> factor
+0 item_list 2 type 7 id 34 = 74 term 54         ;             reduce 87: arith_expr -> term
+0 item_list 2 type 7 id 34 = 74 arith_expr 53   ;             reduce 78: rel_expr -> arith_expr
+0 item_list 2 type 7 id 34 = 74 rel_expr 52     ;             reduce 76: not_expr -> rel_expr
+0 item_list 2 type 7 id 34 = 74 not_expr 50     ;             reduce 74: and_expr -> not_expr
+0 item_list 2 type 7 id 34 = 74 and_expr 49     ;             reduce 72: expr -> and_expr
+0 item_list 2 type 7 id 34 = 74 expr 123        ;             shift 156
+0 item_list 2 type 7 id 34 = 74 expr 123 ; 156  if            reduce 36: decl_stmt -> type id = expr ;
+0 item_list 2 decl_stmt 9                       if            reduce 25: stmt -> decl_stmt
+0 item_list 2 stmt 4                            if            reduce 4: item -> stmt
+0 item_list 2 item 33                           if            reduce 2: item_list -> item_list item
+0 item_list 2                                   if            shift 30
+0 item_list 2 if 30                             (             shift 67
+0 item_list 2 if 30 ( 67                        id            shift 58
+0 item_list 2 if 30 ( 67 id 58                  <             reduce 94: factor -> id
+0 item_list 2 if 30 ( 67 factor 55              <             reduce 91: term -> factor
+0 item_list 2 if 30 ( 67 term 54                <             reduce 87: arith_expr -> term
+0 item_list 2 if 30 ( 67 arith_expr 53          <             shift 93
+0 item_list 2 if 30 ( 67 arith_expr 53 < 93     id            reduce 79: relop -> <
+... m_list 2 if 30 ( 67 arith_expr 53 relop 92  id            shift 58
+...  2 if 30 ( 67 arith_expr 53 relop 92 id 58  )             reduce 94: factor -> id
+... f 30 ( 67 arith_expr 53 relop 92 factor 55  )             reduce 91: term -> factor
+...  if 30 ( 67 arith_expr 53 relop 92 term 54  )             reduce 87: arith_expr -> term
+... ( 67 arith_expr 53 relop 92 arith_expr 135  )             reduce 77: rel_expr -> arith_expr relop arith_expr
+0 item_list 2 if 30 ( 67 rel_expr 52            )             reduce 76: not_expr -> rel_expr
+0 item_list 2 if 30 ( 67 not_expr 50            )             reduce 74: and_expr -> not_expr
+0 item_list 2 if 30 ( 67 and_expr 49            )             reduce 72: expr -> and_expr
+0 item_list 2 if 30 ( 67 expr 113               )             shift 148
+0 item_list 2 if 30 ( 67 expr 113 ) 148         {             shift 32
+0 item_list 2 if 30 ( 67 expr 113 ) 148 { 32    id            shift 24
+... ist 2 if 30 ( 67 expr 113 ) 148 { 32 id 24  =             reduce 52: lvalue -> id
+... 2 if 30 ( 67 expr 113 ) 148 { 32 lvalue 23  =             shift 37
+... 30 ( 67 expr 113 ) 148 { 32 lvalue 23 = 37  id            shift 58
+... 7 expr 113 ) 148 { 32 lvalue 23 = 37 id 58  +             reduce 94: factor -> id
+... pr 113 ) 148 { 32 lvalue 23 = 37 factor 55  +             reduce 91: term -> factor
+... expr 113 ) 148 { 32 lvalue 23 = 37 term 54  +             reduce 87: arith_expr -> term
+... 13 ) 148 { 32 lvalue 23 = 37 arith_expr 53  +             shift 99
+... 148 { 32 lvalue 23 = 37 arith_expr 53 + 99  int_lit       shift 59
+... alue 23 = 37 arith_expr 53 + 99 int_lit 59  ;             reduce 98: factor -> int_lit
+... value 23 = 37 arith_expr 53 + 99 factor 55  ;             reduce 91: term -> factor
+... lvalue 23 = 37 arith_expr 53 + 99 term 136  ;             reduce 85: arith_expr -> arith_expr + term
+... 13 ) 148 { 32 lvalue 23 = 37 arith_expr 53  ;             reduce 78: rel_expr -> arith_expr
+...  113 ) 148 { 32 lvalue 23 = 37 rel_expr 52  ;             reduce 76: not_expr -> rel_expr
+...  113 ) 148 { 32 lvalue 23 = 37 not_expr 50  ;             reduce 74: and_expr -> not_expr
+...  113 ) 148 { 32 lvalue 23 = 37 and_expr 49  ;             reduce 72: expr -> and_expr
+... expr 113 ) 148 { 32 lvalue 23 = 37 expr 78  ;             reduce 44: simple -> lvalue = expr
+... 2 if 30 ( 67 expr 113 ) 148 { 32 simple 22  ;             shift 36
+... 30 ( 67 expr 113 ) 148 { 32 simple 22 ; 36  }             reduce 43: assign_stmt -> simple ;
+... 30 ( 67 expr 113 ) 148 { 32 assign_stmt 10  }             reduce 26: stmt -> assign_stmt
+... t 2 if 30 ( 67 expr 113 ) 148 { 32 stmt 70  }             reduce 24: stmt_list -> stmt
+... f 30 ( 67 expr 113 ) 148 { 32 stmt_list 69  }             shift 116
+...  67 expr 113 ) 148 { 32 stmt_list 69 } 116  else          reduce 69: block -> { stmt_list }
+... _list 2 if 30 ( 67 expr 113 ) 148 block 19  else          reduce 35: stmt -> block
+... _list 2 if 30 ( 67 expr 113 ) 148 stmt 170  else          shift 187
+... f 30 ( 67 expr 113 ) 148 stmt 170 else 187  {             shift 32
+... ( 67 expr 113 ) 148 stmt 170 else 187 { 32  id            shift 24
+... xpr 113 ) 148 stmt 170 else 187 { 32 id 24  =             reduce 52: lvalue -> id
+... 113 ) 148 stmt 170 else 187 { 32 lvalue 23  =             shift 37
+...  148 stmt 170 else 187 { 32 lvalue 23 = 37  id            shift 58
+... tmt 170 else 187 { 32 lvalue 23 = 37 id 58  -             reduce 94: factor -> id
+... 170 else 187 { 32 lvalue 23 = 37 factor 55  -             reduce 91: term -> factor
+... t 170 else 187 { 32 lvalue 23 = 37 term 54  -             reduce 87: arith_expr -> term
+... else 187 { 32 lvalue 23 = 37 arith_expr 53  -             shift 100
+... 87 { 32 lvalue 23 = 37 arith_expr 53 - 100  int_lit       shift 59
+... lue 23 = 37 arith_expr 53 - 100 int_lit 59  ;             reduce 98: factor -> int_lit
+... alue 23 = 37 arith_expr 53 - 100 factor 55  ;             reduce 91: term -> factor
+... value 23 = 37 arith_expr 53 - 100 term 137  ;             reduce 86: arith_expr -> arith_expr - term
+... else 187 { 32 lvalue 23 = 37 arith_expr 53  ;             reduce 78: rel_expr -> arith_expr
+... 0 else 187 { 32 lvalue 23 = 37 rel_expr 52  ;             reduce 76: not_expr -> rel_expr
+... 0 else 187 { 32 lvalue 23 = 37 not_expr 50  ;             reduce 74: and_expr -> not_expr
+... 0 else 187 { 32 lvalue 23 = 37 and_expr 49  ;             reduce 72: expr -> and_expr
+... t 170 else 187 { 32 lvalue 23 = 37 expr 78  ;             reduce 44: simple -> lvalue = expr
+... 113 ) 148 stmt 170 else 187 { 32 simple 22  ;             shift 36
+...  148 stmt 170 else 187 { 32 simple 22 ; 36  }             reduce 43: assign_stmt -> simple ;
+...  148 stmt 170 else 187 { 32 assign_stmt 10  }             reduce 26: stmt -> assign_stmt
+... r 113 ) 148 stmt 170 else 187 { 32 stmt 70  }             reduce 24: stmt_list -> stmt
+...  ) 148 stmt 170 else 187 { 32 stmt_list 69  }             shift 116
+...  stmt 170 else 187 { 32 stmt_list 69 } 116  $             reduce 69: block -> { stmt_list }
+...  expr 113 ) 148 stmt 170 else 187 block 19  $             reduce 35: stmt -> block
+...  expr 113 ) 148 stmt 170 else 187 stmt 192  $             reduce 67: if_stmt -> if ( expr ) stmt else stmt
+0 item_list 2 if_stmt 17                        $             reduce 33: stmt -> if_stmt
+0 item_list 2 stmt 4                            $             reduce 4: item -> stmt
+0 item_list 2 item 33                           $             reduce 2: item_list -> item_list item
+0 item_list 2                                   $             reduce 1: program -> item_list
 0 program 1                                     $             accept
 
 === ANNOTATED AST ===
@@ -162,10 +171,10 @@ Program   [1:1]
           Int 1  : int   [6:13]
 
 === SYMBOL TABLE ===
-NAME      RESOLVED  TYPE    SCOPE  DECLARED
+NAME      RESOLVED  TYPE      SCOPE  DECLARED
 ---------------------------------------------
-x         x         int     0      line 1, col 1
-y         y         int     0      line 2, col 1
+x         x         int       0      line 1, col 1
+y         y         int       0      line 2, col 1
 
 === THREE-ADDRESS CODE ===
    0:  x = 5

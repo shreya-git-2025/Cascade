@@ -1,0 +1,2 @@
+int forever(int n) { return forever(n + 1) + 1; }
+int x = forever(0);

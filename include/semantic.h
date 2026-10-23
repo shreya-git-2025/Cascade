@@ -26,6 +26,21 @@ struct SymbolEntry {
     int column;
     bool assigned;  // has an initializer or assignment been seen yet?
     bool warned = false; // uninitialized-read warning already issued
+    bool isArray = false;      // declared with [] (type is then the ELEMENT type)
+    long long arraySize = 0;   // element count (0 for array parameters: size unknown)
+    std::string owner;         // enclosing function, "" for top-level code
+};
+
+// A function's signature, collected in a pre-pass over the program so a
+// call may appear before (or inside) the definition it refers to.
+struct FuncSig {
+    std::string name;
+    Type ret = Type::Void;
+    std::vector<Type> paramTypes;     // element type for array parameters
+    std::vector<bool> paramIsArray;
+    int line = 0;
+    int column = 0;
+    bool defined = false; // false while only a prototype has been seen
 };
 
 // Walks the AST with a stack of scopes (pushed on entering a block, popped
@@ -47,6 +62,7 @@ public:
 
     // Every variable ever declared, in declaration order.
     const std::vector<SymbolEntry>& symbols() const { return entries_; }
+    const std::unordered_map<std::string, FuncSig>& functions() const { return funcs_; }
     void printSymbolTable(std::ostream& out) const;
 
 private:
@@ -56,6 +72,12 @@ private:
     std::vector<SemanticDiag> errors_;
     std::vector<SemanticDiag> warnings_;
 
+    std::unordered_map<std::string, FuncSig> funcs_;
+    std::string curFunc_;          // "" while analysing top-level code
+    Type curRet_ = Type::Void;
+    bool inFunc_ = false;
+    int loopDepth_ = 0;            // > 0 inside a while/for body (for break/continue)
+
     void pushScope() { scopes_.emplace_back(); }
     void popScope() { scopes_.pop_back(); }
     SymbolEntry* lookup(const std::string& name);
@@ -63,11 +85,17 @@ private:
     void error(const Node& at, const std::string& msg);
     void warning(const Node& at, const std::string& msg);
 
+    void declareFunction(const Node& def);
+    void visitFuncDef(const NodePtr& def);
+    Type visitCall(Node& call);
+    void checkIndex(NodePtr& index);
     void visitStmt(const NodePtr& node);
     void visitStmts(const std::vector<NodePtr>& stmts);
     Type visitExpr(NodePtr& node);
     void checkCondition(NodePtr& cond, const std::string& construct);
     void coerceToFloat(NodePtr& node);
+    void toBool(NodePtr& node);       // numeric value used as a condition -> (value != 0)
+    void boolToInt(NodePtr& node);    // comparison result used as a number -> 0 / 1
     bool checkStore(const Node& at, Type target, NodePtr& value, const std::string& what);
 };
 

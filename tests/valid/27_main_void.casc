@@ -1,0 +1,8 @@
+int seven(void);
+void hello(void) { print(42); }
+int main(void) {
+    hello();
+    print(seven());
+    return 0;
+}
+int seven(void) { return 7; }

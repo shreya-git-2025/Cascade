@@ -1,0 +1,7 @@
+
+=== PROGRAM STATE (after 188 VM steps) ===
+  total     int    = 55
+  i         int    = 6
+  h         float  = 27.5
+  values    int[4] = [10, 20, 50, 40]
+[exit 0]
