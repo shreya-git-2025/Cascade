@@ -15,6 +15,9 @@ const std::unordered_map<std::string, TokenType>& keywordTable() {
         {"while", TokenType::KW_WHILE},
         {"true", TokenType::KW_TRUE},
         {"false", TokenType::KW_FALSE},
+        {"void", TokenType::KW_VOID},
+        {"return", TokenType::KW_RETURN},
+        {"print", TokenType::KW_PRINT},
     };
     return table;
 }
@@ -151,6 +154,8 @@ Token Lexer::scanOperatorOrPunctuation() {
         case '}': return makeToken(TokenType::RBRACE, "}", startLine, startCol);
         case ';': return makeToken(TokenType::SEMICOLON, ";", startLine, startCol);
         case ',': return makeToken(TokenType::COMMA, ",", startLine, startCol);
+        case '[': return makeToken(TokenType::LBRACKET, "[", startLine, startCol);
+        case ']': return makeToken(TokenType::RBRACKET, "]", startLine, startCol);
 
         case '<':
             if (peek() == '=') { advance(); return makeToken(TokenType::LE, "<=", startLine, startCol); }

@@ -39,7 +39,11 @@ std::string tokenTypeName(TokenType type) {
         case TokenType::RBRACE:        return "RBRACE";
         case TokenType::SEMICOLON:     return "SEMICOLON";
         case TokenType::COMMA:         return "COMMA";
-
+        case TokenType::KW_VOID:       return "KW_VOID";
+        case TokenType::KW_RETURN:     return "KW_RETURN";
+        case TokenType::KW_PRINT:      return "KW_PRINT";
+        case TokenType::LBRACKET:      return "LBRACKET";
+        case TokenType::RBRACKET:      return "RBRACKET";
         case TokenType::END_OF_FILE:   return "EOF";
         case TokenType::LEX_ERROR:     return "LEX_ERROR";
     }

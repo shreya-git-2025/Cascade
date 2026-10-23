@@ -21,6 +21,7 @@ enum class TokenType {
     KW_WHILE,
     KW_TRUE,
     KW_FALSE,
+    KW_VOID, KW_RETURN, KW_PRINT, 
 
     // arithmetic operators
     PLUS, MINUS, STAR, SLASH, PERCENT,
@@ -35,8 +36,8 @@ enum class TokenType {
     ASSIGN,
 
     // punctuation
-    LPAREN, RPAREN, LBRACE, RBRACE, SEMICOLON, COMMA,
-
+    LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET, SEMICOLON, COMMA, 
+    
     // control
     END_OF_FILE,
     LEX_ERROR
