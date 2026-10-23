@@ -7,6 +7,7 @@ std::string typeName(Type t) {
         case Type::Float:   return "float";
         case Type::Bool:    return "bool";
         case Type::Error:   return "<error>";
+        case Type::Void:    return "void";
     }
     return "?";
 }
@@ -49,7 +50,8 @@ void printAst(const NodePtr& node, std::ostream& out, int depth) {
         case NodeKind::Program:    out << "Program"; break;
         case NodeKind::Block:      out << "Block"; break;
         case NodeKind::StmtList:   out << "StmtList"; break;
-        case NodeKind::Decl:       out << "Decl " << typeName(n.declType) << " " << n.text; break;
+       case NodeKind::Decl:       out << "Decl " << typeName(n.declType) << " " << n.text
+                                       << (n.isArray ? "[" + std::to_string(n.arraySize) + "]" : ""); break;
         case NodeKind::Assign:     out << "Assign " << n.text; break;
         case NodeKind::If:         out << (n.kids.size() == 3 ? "IfElse" : "If"); break;
         case NodeKind::While:      out << "While"; break;
@@ -60,6 +62,13 @@ void printAst(const NodePtr& node, std::ostream& out, int depth) {
         case NodeKind::Unary:      out << "Unary " << opSpelling(n.op); break;
         case NodeKind::Binary:     out << "Binary " << opSpelling(n.op); break;
         case NodeKind::IntToFloat: out << "IntToFloat"; break;
+        case NodeKind::FuncDecl:    out << "Func " << typeName(n.declType) << " " << n.text; break;
+        case NodeKind::Param:       out << "Param " << typeName(n.declType) << " " << n.text << (n.isArray ? "[]" : ""); break;
+        case NodeKind::Call:        out << "Call " << n.text; break;
+        case NodeKind::Index:       out << "Index " << n.text; break;
+        case NodeKind::ArrayAssign: out << "ArrayAssign " << n.text; break;
+        case NodeKind::Return:      out << "Return"; break;
+        case NodeKind::Print:       out << "Print"; break;
     }
     out << annotate(n) << "   [" << n.line << ":" << n.column << "]\n";
     for (const NodePtr& kid : n.kids) printAst(kid, out, depth + 1);

@@ -34,6 +34,7 @@ enum class NonTerminal {
     ArithExpr,
     Term,
     Factor,
+    ItemList, Item, FuncDecl, ParamList, Param, ArgList, CallStmt, ReturnStmt, PrintStmt,
     Count
 };
 

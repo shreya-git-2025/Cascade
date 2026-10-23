@@ -9,7 +9,7 @@
 
 // Static types. Bool exists only as the type of conditions/comparisons —
 // the language has no bool variables, so a Bool value is never stored.
-enum class Type { Unknown, Int, Float, Bool, Error };
+enum class Type { Unknown, Int, Float, Bool, Error, Void };
 std::string typeName(Type t);
 
 enum class NodeKind {
@@ -30,6 +30,14 @@ enum class NodeKind {
     IntToFloat, // implicit widening, inserted by the semantic analyzer
     // parser-internal: an accumulating stmt_list, flattened before the
     // tree is handed to later stages
+    FuncDecl,    // text=name, declType=return type, kids = Param..., Block (last)
+    Param,       // text=name, declType, isArray
+    Call,        // text=name, kids = args
+    Index,       // text=array name, kids[0] = index
+    ArrayAssign, // text=array name, kids = {index, value}
+    Return,      // kids[0] optional
+    Print,       // kids[0]
+
     StmtList
 };
 
@@ -47,7 +55,8 @@ struct Node {
     Type declType = Type::Unknown; // Decl only: the declared type
     Type type = Type::Unknown;     // expressions: annotated by semantic analysis
     std::string resolved;          // Var/Decl/Assign: unique name after scope resolution
-
+    bool isArray = false;
+    long long arraySize = 0;
     Node(NodeKind k, int ln, int col) : kind(k), line(ln), column(col) {}
 };
 
